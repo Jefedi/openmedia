@@ -1,0 +1,26 @@
+# OpenMedia Frontend Dockerfile - Development Mode
+ARG NODE_VERSION=20
+
+FROM node:${NODE_VERSION}-alpine
+
+WORKDIR /app
+
+# Installer les dépendances
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copier la configuration
+COPY next.config.js ./
+COPY tailwind.config.js ./
+COPY tsconfig.json ./
+COPY postcss.config.js* ./
+
+# Le code source sera monté via volume pour hot-reload
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+# Démarrer en mode développement avec hot-reload
+CMD ["npm", "run", "dev"]
