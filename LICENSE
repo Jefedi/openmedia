@@ -1,0 +1,66 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+Copyright (C) 2024 Jefedi and contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+================================================================================
+ADDITIONAL COMMERCIAL USE RESTRICTIONS
+================================================================================
+
+In addition to the terms of the GNU Affero General Public License v3.0,
+the following restrictions apply:
+
+1. COMMERCIAL USE PROHIBITION
+   This software and its derivatives may NOT be used for commercial purposes
+   without explicit written permission from the copyright holder.
+
+   "Commercial purposes" includes but is not limited to:
+   - Offering the software as a paid service
+   - Using the software to generate revenue directly or indirectly
+   - Incorporating the software into a commercial product
+   - Using the software in a commercial organization's operations
+
+2. PERMITTED USES
+   The following uses are explicitly permitted:
+   - Personal, non-commercial use
+   - Educational and research purposes
+   - Non-profit organizations
+   - Open-source community contributions
+   - Development and testing
+
+3. COMMERCIAL LICENSE
+   Organizations wishing to use this software for commercial purposes
+   must obtain a separate commercial license from the copyright holder.
+   Contact: support@openmedia.example
+
+4. FUTURE VERSIONS
+   The copyright holder reserves the right to release future versions
+   under different licensing terms, including commercial licenses.
+
+5. NETWORK USE
+   As this is licensed under AGPLv3, any network use of this software
+   requires making the complete source code available to users.
+
+6. ATTRIBUTION
+   All derivative works must maintain attribution to the original authors
+   and this license notice.
+
+================================================================================
+
+For the complete AGPLv3 license text, see:
+https://www.gnu.org/licenses/agpl-3.0.txt
+
+For commercial licensing inquiries, contact: support@openmedia.example
