@@ -82,9 +82,13 @@ L'API sera accessible sur `http://localhost:8000`
 L'interface web sur `http://localhost:3000`
 La documentation API sur `http://localhost:8000/docs`
 
+> ⚠️ **Conflits de ports ?** Si les ports 3000 ou 6379 sont déjà utilisés, voir [PORTS_CONFIGURATION.md](PORTS_CONFIGURATION.md)
+
 ## 📚 Documentation
 
 - [Architecture détaillée](docs/ARCHITECTURE.md)
+- [Configuration Docker Compose](docs/DOCKER.md)
+- [Configuration des ports](PORTS_CONFIGURATION.md) ← Si conflits de ports
 - [Documentation API](docs/API.md)
 - [Guide de contribution](docs/CONTRIBUTING.md)
 - [Guide de déploiement](docs/DEPLOYMENT.md)
