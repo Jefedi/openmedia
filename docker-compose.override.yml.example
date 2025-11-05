@@ -10,11 +10,69 @@
 #
 # Note: docker-compose.override.yml est dans .gitignore et ne sera pas commité
 
+# =============================================================================
+# EXEMPLE 1: Changer tous les ports pour éviter les conflits (RECOMMANDÉ)
+# =============================================================================
+# Si vous avez d'autres services qui utilisent les ports par défaut,
+# décommentez cette section pour utiliser des ports alternatifs.
+#
+# services:
+#   db:
+#     ports:
+#       - "15432:5432"  # PostgreSQL sur port 15432 au lieu de 5432
+#
+#   redis:
+#     ports:
+#       - "16379:6379"  # Redis sur port 16379 au lieu de 6379
+#
+#   search:
+#     ports:
+#       - "17700:7700"  # Meilisearch sur port 17700 au lieu de 7700
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+#       interval: 10s
+#       timeout: 3s
+#       retries: 5
+#
+#   api:
+#     ports:
+#       - "18000:8000"  # API sur port 18000 au lieu de 8000
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+#       search:
+#         condition: service_healthy
+#
+#   frontend:
+#     ports:
+#       - "13000:3000"  # Frontend sur port 13000 au lieu de 3000
+#     environment:
+#       NEXT_PUBLIC_API_URL: http://localhost:18000
+#
+#   worker:
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#       redis:
+#         condition: service_healthy
+#       api:
+#         condition: service_healthy
+
+# =============================================================================
+# EXEMPLE 2: Changer un seul port
+# =============================================================================
 services:
   # Exemple: Exposer PostgreSQL sur un port différent
   # db:
   #   ports:
   #     - "5433:5432"
+
+  # Exemple: Utiliser un port différent pour le frontend
+  # frontend:
+  #   ports:
+  #     - "3001:3000"
 
   # Exemple: Monter un volume local pour les backups
   # db:
@@ -36,10 +94,9 @@ services:
   #   volumes:
   #     - ./custom-scripts:/app/custom-scripts
 
-  # Exemple: Utiliser un port différent pour le frontend
-  # frontend:
-  #   ports:
-  #     - "3001:3000"
+# =============================================================================
+# EXEMPLE 3: Ajouter des services de monitoring
+# =============================================================================
 
   # Exemple: Ajouter un service de monitoring
   # prometheus:
