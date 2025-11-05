@@ -8,21 +8,22 @@ The `docker-compose.override.yml` file has been created to resolve port conflict
 
 | Service | Default Port | Override Port | Reason |
 |---------|--------------|---------------|--------|
-| **Redis** | 6379 | **6380** | Port 6379 was already in use on the host |
-| **Frontend** | 3000 | **3001** | Port 3000 was already in use on the host |
-| PostgreSQL | 5432 | 5432 | No conflict |
-| Meilisearch | 7700 | 7700 | No conflict |
-| API | 8000 | 8000 | No conflict |
+| **PostgreSQL** | 5432 | **15432** | Port 5432 was already in use on the host |
+| **Redis** | 6379 | **16379** | Ports 6379, 6380, 6395 were already in use |
+| **Meilisearch** | 7700 | **17700** | Port 7700 was already in use on the host |
+| **API** | 8000 | **18000** | Port 8000 was already in use on the host |
+| **Frontend** | 3000 | **13000** | Ports 3000, 3001 were already in use |
 
 ## How to Access Services
 
 After starting the services with `docker compose up -d`, access them at:
 
-- **Frontend**: http://localhost:3001 (changed from 3000)
-- **API**: http://localhost:8000
-- **Database**: localhost:5432
-- **Redis**: localhost:6380 (changed from 6379)
-- **Meilisearch**: http://localhost:7700
+- **Frontend**: http://localhost:13000 (changed from 3000)
+- **API**: http://localhost:18000 (changed from 8000)
+- **API Docs**: http://localhost:18000/docs
+- **Database**: localhost:15432 (changed from 5432)
+- **Redis**: localhost:16379 (changed from 6379)
+- **Meilisearch**: http://localhost:17700 (changed from 7700)
 
 ## Configuration Changes
 
@@ -36,20 +37,33 @@ search:
     test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
 ```
 
-### 2. Redis Port Mapping
+### 2. Port Mappings
+
+All services have been remapped to use ports in the 10000+ range to avoid conflicts with existing services:
 
 ```yaml
-redis:
-  ports:
-    - "6380:6379"  # External port 6380 maps to internal port 6379
-```
+services:
+  db:
+    ports:
+      - "15432:5432"  # PostgreSQL external port
 
-### 3. Frontend Port Mapping
+  redis:
+    ports:
+      - "16379:6379"  # Redis external port
 
-```yaml
-frontend:
-  ports:
-    - "3001:3000"  # External port 3001 maps to internal port 3000
+  search:
+    ports:
+      - "17700:7700"  # Meilisearch external port
+
+  api:
+    ports:
+      - "18000:8000"  # API external port
+
+  frontend:
+    ports:
+      - "13000:3000"  # Frontend external port
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:18000
 ```
 
 ## Starting the Services
@@ -77,14 +91,24 @@ docker compose logs -f api
 
 2. **Environment Variables**: You don't need to change `REDIS_PORT` or `FRONTEND_PORT` in your `.env` file. These define the internal container ports.
 
-3. **CORS Configuration**: If you're accessing the frontend on port 3001, you may need to update `BACKEND_CORS_ORIGINS` in your `.env`:
+3. **CORS Configuration**: Update `BACKEND_CORS_ORIGINS` in your `.env` to match the new ports:
    ```env
-   BACKEND_CORS_ORIGINS=["http://localhost:3001","http://localhost:8000"]
+   BACKEND_CORS_ORIGINS=["http://localhost:13000","http://localhost:18000"]
    ```
 
 4. **Next.js API URL**: Update the frontend's API URL in `.env`:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_URL=http://localhost:18000
+   ```
+
+5. **Database Connection**: If connecting externally to PostgreSQL, use port 15432:
+   ```bash
+   psql -h localhost -p 15432 -U openmedia -d openmedia
+   ```
+
+6. **Redis Connection**: If connecting externally to Redis, use port 16379:
+   ```bash
+   redis-cli -h localhost -p 16379
    ```
 
 ## Troubleshooting
@@ -95,8 +119,7 @@ If all services show "Up (healthy)" status, you're good to go!
 ### Services still failing to start
 1. Check if other processes are using the overridden ports:
    ```bash
-   sudo lsof -i :6380
-   sudo lsof -i :3001
+   sudo ss -ltnp | grep -E ":(15432|16379|17700|18000|13000)"
    ```
 
 2. View detailed logs:
