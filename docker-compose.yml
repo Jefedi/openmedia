@@ -16,7 +16,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/db_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-15432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openmedia}"]
       interval: 10s
@@ -39,7 +39,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT:-16379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
@@ -62,7 +62,7 @@ services:
     volumes:
       - meilisearch_data:/meili_data
     ports:
-      - "${MEILI_PORT:-7700}:7700"
+      - "${MEILI_PORT:-17700}:7700"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:7700/health"]
       interval: 10s
@@ -117,7 +117,7 @@ services:
       - ./backend/alembic:/app/alembic:ro
       - api_logs:/app/logs
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "${API_PORT:-18000}:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -213,7 +213,7 @@ services:
       - /app/node_modules
       - /app/.next
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-13000}:3000"
     depends_on:
       - api
     networks:
