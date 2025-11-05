@@ -10,8 +10,6 @@
 #
 # Note: docker-compose.override.yml est dans .gitignore et ne sera pas commité
 
-version: '3.9'
-
 services:
   # Exemple: Exposer PostgreSQL sur un port différent
   # db:
