@@ -54,35 +54,33 @@ Une plateforme open-source tout-en-un pour la gestion et le suivi de films/séri
 - 4 GB RAM minimum
 - 20 GB espace disque
 
-### Installation
+### Installation en 3 Étapes
 
 ```bash
-# Cloner le projet
+# 1. Cloner le projet
 git clone https://github.com/Jefedi/openmedia.git
 cd openmedia
 
-# Copier et configurer les variables d'environnement
+# 2. Configurer l'environnement
 cp .env.example .env
-nano .env  # Modifier les secrets et mots de passe
+nano .env  # Modifier les mots de passe (OBLIGATOIRE)
 
-# Démarrer tous les services
-docker-compose up -d
-
-# Vérifier l'état des services
-docker-compose ps
-
-# Initialiser la base de données
-docker-compose exec api python -m alembic upgrade head
-
-# Créer un utilisateur admin
-docker-compose exec api python scripts/create_admin.py
+# 3. Déployer automatiquement
+chmod +x deploy.sh
+./deploy.sh
 ```
 
-L'API sera accessible sur `http://localhost:8000`
-L'interface web sur `http://localhost:3000`
-La documentation API sur `http://localhost:8000/docs`
+**📖 [Guide de Démarrage Complet →](QUICKSTART.md)**
 
-> ⚠️ **Conflits de ports ?** Si les ports 3000 ou 6379 sont déjà utilisés, voir [PORTS_CONFIGURATION.md](PORTS_CONFIGURATION.md)
+### Accès aux Services
+
+Une fois déployé, les services seront accessibles :
+
+- **Frontend** : http://localhost:13000
+- **API** : http://localhost:18000
+- **API Docs** : http://localhost:18000/docs
+
+> ⚠️ **Note :** Les ports ont été changés pour éviter les conflits (13000-18000 au lieu de 3000-8000). Voir [PORTS_CONFIGURATION.md](PORTS_CONFIGURATION.md)
 
 ## 📚 Documentation
 
