@@ -82,7 +82,9 @@ Une fois déployé, les services seront accessibles :
 
 - **Frontend** : http://localhost:13000
 - **API** : http://localhost:18000
-- **API Docs** : http://localhost:18000/docs
+- **API Docs (Swagger)** : http://localhost:18000/api/v1/docs
+- **API Docs (ReDoc)** : http://localhost:18000/api/v1/redoc
+- **Meilisearch** : http://localhost:17700
 
 > ⚠️ **Note :** Les ports ont été changés pour éviter les conflits (13000-18000 au lieu de 3000-8000). Voir [PORTS_CONFIGURATION.md](PORTS_CONFIGURATION.md)
 
