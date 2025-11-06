@@ -28,17 +28,9 @@ fi
 
 echo "✅ API démarrée"
 
-# Créer la migration initiale si elle n'existe pas
-if [ ! -f backend/alembic/versions/*initial*.py ]; then
-    echo "📝 Création de la migration initiale..."
-    docker compose exec api alembic revision --autogenerate -m "Initial migration"
-else
-    echo "ℹ️  Migration initiale existante"
-fi
-
-# Appliquer les migrations
-echo "🔄 Application des migrations..."
-docker compose exec api alembic upgrade head
+# Créer les tables directement avec SQLAlchemy
+echo "📝 Création des tables dans la base de données..."
+docker compose exec api python -m app.create_tables
 
 echo "✅ Base de données initialisée avec succès !"
 

@@ -28,8 +28,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le code de l'application
 COPY --chown=appuser:appuser . .
 
-# Créer les répertoires nécessaires
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app
+# Créer les répertoires nécessaires avec les bonnes permissions
+RUN mkdir -p /app/logs /app/alembic/versions && chown -R appuser:appuser /app
 
 # Passer à l'utilisateur non-root
 USER appuser
