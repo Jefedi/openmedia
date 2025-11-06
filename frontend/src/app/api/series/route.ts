@@ -11,7 +11,7 @@ export async function GET() {
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'no-store', // Toujours récupérer les données fraîches
+        cache: 'no-store', // Toujours rÃ©cupÃ©rer les donnÃ©es fraÃ®ches
       }
     );
 

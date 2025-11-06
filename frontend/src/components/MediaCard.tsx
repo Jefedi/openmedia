@@ -84,7 +84,7 @@ export default function MediaCard({
             {year && type && <span>"</span>}
             {type && (
               <span className="capitalize">
-                {type === 'series' ? 'Série' : 'Film'}
+                {type === 'series' ? 'SÃ©rie' : 'Film'}
               </span>
             )}
           </div>
