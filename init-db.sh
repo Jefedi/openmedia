@@ -3,13 +3,22 @@ set -e
 
 echo "🔄 Initialisation de la base de données OpenMedia..."
 
-# Reconstruire le conteneur API pour avoir les derniers fichiers
-echo "🔨 Reconstruction du conteneur API avec les derniers fichiers..."
-docker compose up -d --build api
+# Arrêter tous les services et recréer les volumes pour éviter les conflits de mot de passe
+echo "🛑 Arrêt des services existants..."
+docker compose down
 
-# Attendre que l'API soit prête
-echo "⏳ Attente du démarrage de l'API..."
-sleep 10
+echo "🗑️  Suppression des volumes (pour éviter les conflits de credentials)..."
+docker volume rm openmedia_postgres_data 2>/dev/null || echo "Volume postgres_data n'existe pas encore"
+docker volume rm openmedia_redis_data 2>/dev/null || echo "Volume redis_data n'existe pas encore"
+docker volume rm openmedia_meilisearch_data 2>/dev/null || echo "Volume meilisearch_data n'existe pas encore"
+
+# Reconstruire et redémarrer tous les services
+echo "🔨 Reconstruction et démarrage de tous les services..."
+docker compose up -d --build
+
+# Attendre que les services soient prêts
+echo "⏳ Attente du démarrage des services..."
+sleep 15
 
 # Vérifier que l'API est accessible
 if ! docker compose exec api curl -f http://localhost:8000/health > /dev/null 2>&1; then
