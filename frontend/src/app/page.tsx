@@ -1,27 +1,45 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import MediaCard from '@/components/MediaCard';
 
-interface HealthStatus {
-  status: string;
-  version: string;
-  environment: string;
+interface Movie {
+  id: number;
+  title: string;
+  year?: number;
+  poster_path?: string;
+  vote_average?: number;
+  overview?: string;
+}
+
+interface Series {
+  id: number;
+  name: string;
+  year?: number;
+  poster_path?: string;
+  vote_average?: number;
+  overview?: string;
 }
 
 export default function Home() {
-  const [apiHealth, setApiHealth] = useState<HealthStatus | null>(null);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Utiliser le proxy API Next.js pour éviter les problèmes CORS
-    fetch('/api/health-proxy')
-      .then(res => res.json())
-      .then(data => {
-        setApiHealth(data);
+    // Charger les films et séries depuis l'API
+    Promise.all([
+      fetch('/api/movies').then(res => res.ok ? res.json() : { movies: [] }),
+      fetch('/api/series').then(res => res.ok ? res.json() : { series: [] })
+    ])
+      .then(([moviesData, seriesData]) => {
+        setMovies(moviesData.movies || []);
+        setSeries(seriesData.series || []);
         setLoading(false);
       })
       .catch((error) => {
-        console.error('API Health check failed:', error);
+        console.error('Failed to load data:', error);
         setLoading(false);
       });
   }, []);
@@ -29,175 +47,172 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       {/* Header */}
-      <header className="border-b border-gray-700 bg-black/50 backdrop-blur-sm">
+      <header className="border-b border-gray-700 bg-black/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition">
               <span className="text-3xl">🎬</span>
               <h1 className="text-2xl font-bold">OpenMedia</h1>
-            </div>
-            <nav className="flex gap-3">
-              <a
-                href="/login"
-                className="px-4 py-2 rounded-lg border border-gray-600 hover:border-gray-500 transition"
-              >
-                Login
-              </a>
-              <a
-                href="/register"
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
-              >
-                Sign Up
-              </a>
+            </Link>
+            <nav className="flex gap-6 items-center">
+              <Link href="/movies" className="hover:text-blue-400 transition">
+                Films
+              </Link>
+              <Link href="/series" className="hover:text-blue-400 transition">
+                Séries
+              </Link>
+              <Link href="/search" className="hover:text-blue-400 transition">
+                Recherche
+              </Link>
+              <div className="flex gap-3 ml-4">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-lg border border-gray-600 hover:border-gray-500 transition"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
+                >
+                  S'inscrire
+                </Link>
+              </div>
             </nav>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 text-transparent bg-clip-text">
-            Your All-in-One Movie & Series Platform
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 text-transparent bg-clip-text">
+            Votre Plateforme de Films & Séries
           </h2>
-          <p className="text-xl text-gray-300 mb-12">
-            Track, discover, and manage your favorite movies and TV shows with OpenMedia
+          <p className="text-xl text-gray-300 mb-8">
+            Découvrez, suivez et gérez vos films et séries préférés avec OpenMedia
           </p>
-
-          {/* Status Card */}
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-8 mb-12">
-            <h3 className="text-2xl font-bold mb-6">🚀 Platform Status</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-gray-900/50 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400">API Status</span>
-                  {loading ? (
-                    <span className="text-yellow-500">⏳ Checking...</span>
-                  ) : apiHealth ? (
-                    <span className="text-green-500">✅ {apiHealth.status}</span>
-                  ) : (
-                    <span className="text-red-500">❌ Offline</span>
-                  )}
-                </div>
-                {apiHealth && (
-                  <div className="text-sm text-gray-500">
-                    Version: {apiHealth.version} | Env: {apiHealth.environment}
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-gray-900/50 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400">Database</span>
-                  <span className="text-green-500">✅ PostgreSQL 15</span>
-                </div>
-                <div className="text-sm text-gray-500">
-                  19 tables created
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Admin Credentials */}
-          <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-xl p-6 mb-12">
-            <h3 className="text-xl font-bold mb-4 text-yellow-400">🔐 Admin Credentials</h3>
-            <div className="text-left space-y-2 font-mono text-sm">
-              <div>
-                <span className="text-gray-400">Email:</span>{' '}
-                <span className="text-white">admin@openmedia.local</span>
-              </div>
-              <div>
-                <span className="text-gray-400">Password:</span>{' '}
-                <span className="text-white">2wEKIewcTKJi4q6RDF_Zi0Y91lE5zdfkInkH4UsJSdc</span>
-              </div>
-            </div>
-            <p className="text-yellow-400 text-sm mt-4">
-              ⚠️ Change this password after first login!
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <a
-              href="http://localhost:18000/api/v1/docs"
-              target="_blank"
-              className="bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 rounded-xl p-6 transition group"
-            >
-              <div className="text-4xl mb-4">📚</div>
-              <h4 className="text-lg font-bold mb-2">API Documentation</h4>
-              <p className="text-gray-400 text-sm">
-                Interactive Swagger UI
-              </p>
-            </a>
-
-            <a
-              href="http://localhost:18000/api/v1/redoc"
-              target="_blank"
-              className="bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 rounded-xl p-6 transition group"
-            >
-              <div className="text-4xl mb-4">📖</div>
-              <h4 className="text-lg font-bold mb-2">ReDoc</h4>
-              <p className="text-gray-400 text-sm">
-                Alternative API docs
-              </p>
-            </a>
-
-            <a
-              href="http://localhost:17700"
-              target="_blank"
-              className="bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 rounded-xl p-6 transition group"
-            >
-              <div className="text-4xl mb-4">🔍</div>
-              <h4 className="text-lg font-bold mb-2">Meilisearch</h4>
-              <p className="text-gray-400 text-sm">
-                Search engine dashboard
-              </p>
-            </a>
-          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="container mx-auto px-4 py-20 border-t border-gray-800">
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-12">Platform Features</h3>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl">🎯</span>
-              <div>
-                <h4 className="font-bold mb-2">Track Your Watchlist</h4>
-                <p className="text-gray-400">Keep track of movies and series you want to watch</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl">⭐</span>
-              <div>
-                <h4 className="font-bold mb-2">Rate & Review</h4>
-                <p className="text-gray-400">Share your opinions and ratings with the community</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl">📊</span>
-              <div>
-                <h4 className="font-bold mb-2">Progress Tracking</h4>
-                <p className="text-gray-400">Monitor your viewing progress across all series</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <span className="text-3xl">🌍</span>
-              <div>
-                <h4 className="font-bold mb-2">Streaming Availability</h4>
-                <p className="text-gray-400">Find where to watch your favorite content</p>
-              </div>
-            </div>
+      {/* Films Récents */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold">🎥 Films Récents</h2>
+          <Link
+            href="/movies"
+            className="text-blue-400 hover:text-blue-300 transition flex items-center gap-2"
+          >
+            Voir tout
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-gray-800 rounded-lg aspect-[2/3] animate-pulse"></div>
+            ))}
           </div>
+        ) : movies.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {movies.slice(0, 6).map((movie) => (
+              <MediaCard
+                key={movie.id}
+                id={movie.id}
+                title={movie.title}
+                year={movie.year}
+                posterPath={movie.poster_path}
+                voteAverage={movie.vote_average}
+                type="movie"
+                overview={movie.overview}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-lg p-12 text-center">
+            <p className="text-gray-400 mb-4">Aucun film disponible pour le moment</p>
+            <Link
+              href="/search"
+              className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+            >
+              Rechercher des films
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Séries Récentes */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-bold">📺 Séries Récentes</h2>
+          <Link
+            href="/series"
+            className="text-blue-400 hover:text-blue-300 transition flex items-center gap-2"
+          >
+            Voir tout
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-gray-800 rounded-lg aspect-[2/3] animate-pulse"></div>
+            ))}
+          </div>
+        ) : series.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {series.slice(0, 6).map((show) => (
+              <MediaCard
+                key={show.id}
+                id={show.id}
+                title={show.name}
+                year={show.year}
+                posterPath={show.poster_path}
+                voteAverage={show.vote_average}
+                type="series"
+                overview={show.overview}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-lg p-12 text-center">
+            <p className="text-gray-400 mb-4">Aucune série disponible pour le moment</p>
+            <Link
+              href="/search"
+              className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+            >
+              Rechercher des séries
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Call to Action */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-center">
+          <h2 className="text-4xl font-bold mb-4">Prêt à commencer ?</h2>
+          <p className="text-xl mb-8 text-blue-100">
+            Créez votre compte et commencez à suivre vos films et séries préférés
+          </p>
+          <Link
+            href="/register"
+            className="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-gray-100 transition text-lg"
+          >
+            Créer un compte gratuitement
+          </Link>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 text-center text-gray-500">
-        <p>OpenMedia v0.1.0 - Open Source Movie & Series Platform</p>
-        <p className="text-sm mt-2">Built with FastAPI, Next.js, PostgreSQL & Meilisearch</p>
+        <p>OpenMedia v0.1.0 - Plateforme Open Source de Films & Séries</p>
+        <p className="text-sm mt-2">Propulsé par FastAPI, Next.js, PostgreSQL & OMDb</p>
       </footer>
     </main>
   );
