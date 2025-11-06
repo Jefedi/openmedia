@@ -13,13 +13,15 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:18000/health')
+    // Utiliser le proxy API Next.js pour éviter les problèmes CORS
+    fetch('/api/health-proxy')
       .then(res => res.json())
       .then(data => {
         setApiHealth(data);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('API Health check failed:', error);
         setLoading(false);
       });
   }, []);
