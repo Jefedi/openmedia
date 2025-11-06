@@ -54,7 +54,7 @@ Une plateforme open-source tout-en-un pour la gestion et le suivi de films/séri
 - 4 GB RAM minimum
 - 20 GB espace disque
 
-### Installation en 2 Étapes
+### Installation en 3 Étapes
 
 ```bash
 # 1. Cloner le projet
@@ -64,9 +64,15 @@ cd openmedia
 # 2. Déployer (génère automatiquement un .env sécurisé)
 chmod +x deploy.sh
 ./deploy.sh
+
+# 3. Initialiser la base de données
+chmod +x init-db.sh
+./init-db.sh
 ```
 
 > 💡 **Le script `deploy.sh` génère automatiquement un fichier `.env` avec des mots de passe aléatoires sécurisés !**
+>
+> 💡 **Le script `init-db.sh` crée les tables de la base de données et l'utilisateur admin !**
 
 **📖 [Guide de Démarrage Complet →](QUICKSTART.md)**
 
