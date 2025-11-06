@@ -1,4 +1,4 @@
-"""Routes API pour les séries TV"""
+"""Routes API pour les sï¿½ries TV"""
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -16,10 +16,11 @@ from app.schemas.media import (
     SeasonCreate,
     EpisodeResponse,
     EpisodeCreate,
-    TMDBSearchResponse
+    OMDbSearchResponse,
+    OMDbDetailResponse
 )
 from app.routes.auth import get_current_user
-from app.services.tmdb import tmdb_service
+from app.services.omdb import omdb_service
 
 router = APIRouter(prefix="/series", tags=["TV Series"])
 
@@ -41,14 +42,14 @@ async def list_series(
     db: Session = Depends(get_db)
 ):
     """
-    Liste des séries avec pagination et filtres
+    Liste des sï¿½ries avec pagination et filtres
 
     Args:
-        page: Numéro de page
-        page_size: Nombre d'éléments par page
+        page: Numï¿½ro de page
+        page_size: Nombre d'ï¿½lï¿½ments par page
         search: Recherche par nom
         genre: Filtrer par genre (slug)
-        year: Filtrer par année de première diffusion
+        year: Filtrer par annï¿½e de premiï¿½re diffusion
         status: Filtrer par statut (returning, ended, etc.)
         sort_by: Trier par
         order: Ordre de tri (asc, desc)
@@ -65,7 +66,7 @@ async def list_series(
     if genre:
         query = query.join(Series.genres).filter(Genre.slug == genre)
 
-    # Filtrer par année
+    # Filtrer par annï¿½e
     if year:
         query = query.filter(Series.year == year)
 
@@ -99,13 +100,13 @@ async def get_series(
     series_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir une série par ID"""
+    """Obtenir une sï¿½rie par ID"""
     series = db.query(Series).filter(Series.id == series_id).first()
 
     if not series:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Série non trouvée"
+            detail="Sï¿½rie non trouvï¿½e"
         )
 
     return series
@@ -117,24 +118,24 @@ async def create_series(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Créer une nouvelle série"""
-    # Vérifier si la série existe déjà
+    """Crï¿½er une nouvelle sï¿½rie"""
+    # Vï¿½rifier si la sï¿½rie existe dï¿½jï¿½
     if series_data.tmdb_id:
         existing = db.query(Series).filter(Series.tmdb_id == series_data.tmdb_id).first()
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Une série avec cet ID TMDB existe déjà"
+                detail="Une sï¿½rie avec cet ID TMDB existe dï¿½jï¿½"
             )
 
     existing_slug = db.query(Series).filter(Series.slug == series_data.slug).first()
     if existing_slug:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Une série avec ce slug existe déjà"
+            detail="Une sï¿½rie avec ce slug existe dï¿½jï¿½"
         )
 
-    # Créer la série
+    # Crï¿½er la sï¿½rie
     series = Series(**series_data.model_dump())
     db.add(series)
     db.commit()
@@ -150,16 +151,16 @@ async def update_series(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Mettre à jour une série"""
+    """Mettre ï¿½ jour une sï¿½rie"""
     series = db.query(Series).filter(Series.id == series_id).first()
 
     if not series:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Série non trouvée"
+            detail="Sï¿½rie non trouvï¿½e"
         )
 
-    # Mettre à jour les champs fournis
+    # Mettre ï¿½ jour les champs fournis
     for field, value in series_data.model_dump(exclude_unset=True).items():
         setattr(series, field, value)
 
@@ -175,11 +176,11 @@ async def delete_series(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Supprimer une série (admin uniquement)"""
+    """Supprimer une sï¿½rie (admin uniquement)"""
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vous n'avez pas les droits pour supprimer des séries"
+            detail="Vous n'avez pas les droits pour supprimer des sï¿½ries"
         )
 
     series = db.query(Series).filter(Series.id == series_id).first()
@@ -187,7 +188,7 @@ async def delete_series(
     if not series:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Série non trouvée"
+            detail="Sï¿½rie non trouvï¿½e"
         )
 
     db.delete(series)
@@ -203,13 +204,13 @@ async def get_series_seasons(
     series_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir toutes les saisons d'une série"""
+    """Obtenir toutes les saisons d'une sï¿½rie"""
     series = db.query(Series).filter(Series.id == series_id).first()
 
     if not series:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Série non trouvée"
+            detail="Sï¿½rie non trouvï¿½e"
         )
 
     return series.seasons
@@ -221,7 +222,7 @@ async def get_season(
     season_number: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir une saison spécifique"""
+    """Obtenir une saison spï¿½cifique"""
     season = db.query(Season).filter(
         Season.series_id == series_id,
         Season.season_number == season_number
@@ -230,7 +231,7 @@ async def get_season(
     if not season:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Saison non trouvée"
+            detail="Saison non trouvï¿½e"
         )
 
     return season
@@ -246,7 +247,7 @@ async def get_season_episodes(
     season_number: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir tous les épisodes d'une saison"""
+    """Obtenir tous les ï¿½pisodes d'une saison"""
     episodes = db.query(Episode).filter(
         Episode.series_id == series_id,
         Episode.season_number == season_number
@@ -262,7 +263,7 @@ async def get_episode(
     episode_number: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir un épisode spécifique"""
+    """Obtenir un ï¿½pisode spï¿½cifique"""
     episode = db.query(Episode).filter(
         Episode.series_id == series_id,
         Episode.season_number == season_number,
@@ -272,7 +273,7 @@ async def get_episode(
     if not episode:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Épisode non trouvé"
+            detail="ï¿½pisode non trouvï¿½"
         )
 
     return episode
@@ -280,195 +281,150 @@ async def get_episode(
 
 # ============================================================================
 # TMDB INTEGRATION
+
+# ============================================================================
+# OMDB INTEGRATION
 # ============================================================================
 
-@router.get("/tmdb/search", response_model=TMDBSearchResponse)
-async def search_series_tmdb(
+@router.get("/omdb/search", response_model=OMDbSearchResponse)
+async def search_series_omdb(
     query: str = Query(..., min_length=1),
-    page: int = Query(1, ge=1),
-    first_air_date_year: Optional[int] = None,
-    language: str = Query("fr-FR")
+    page: int = Query(1, ge=1, le=100),
+    year: Optional[int] = None
 ):
-    """Rechercher des séries sur TMDB"""
-    if not tmdb_service:
+    """Rechercher des sÃ©ries sur OMDb"""
+    if not omdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
+            detail="Service OMDb non disponible"
         )
 
-    results = await tmdb_service.search_tv(
+    results = await omdb_service.search_series(
         query=query,
         page=page,
-        first_air_date_year=first_air_date_year,
-        language=language
+        year=year
     )
 
     if not results:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erreur lors de la recherche TMDB"
+            detail="Erreur lors de la recherche OMDb"
         )
 
-    return TMDBSearchResponse(
-        results=results.get("results", []),
-        total_results=results.get("total_results", 0),
-        page=results.get("page", 1),
-        total_pages=results.get("total_pages", 0)
-    )
+    return results
 
 
-@router.get("/tmdb/popular", response_model=TMDBSearchResponse)
-async def get_popular_series_tmdb(
-    page: int = Query(1, ge=1),
-    language: str = Query("fr-FR")
+@router.get("/omdb/imdb/{imdb_id}", response_model=OMDbDetailResponse)
+async def get_series_from_omdb(
+    imdb_id: str,
+    plot: str = Query("full", regex="^(short|full)$")
 ):
-    """Obtenir les séries populaires depuis TMDB"""
-    if not tmdb_service:
+    """Obtenir les dÃ©tails d'une sÃ©rie depuis OMDb par ID IMDb"""
+    if not omdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
+            detail="Service OMDb non disponible"
         )
 
-    results = await tmdb_service.get_popular_tv(page=page, language=language)
-
-    if not results:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erreur lors de la récupération des séries populaires"
-        )
-
-    return TMDBSearchResponse(
-        results=results.get("results", []),
-        total_results=results.get("total_results", 0),
-        page=results.get("page", 1),
-        total_pages=results.get("total_pages", 0)
-    )
-
-
-@router.get("/tmdb/{tmdb_id}")
-async def get_series_from_tmdb(
-    tmdb_id: int,
-    language: str = Query("fr-FR")
-):
-    """Obtenir les détails d'une série depuis TMDB"""
-    if not tmdb_service:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
-        )
-
-    series = await tmdb_service.get_tv_details(tmdb_id, language=language)
+    series = await omdb_service.get_by_imdb_id(imdb_id, plot=plot)
 
     if not series:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Série non trouvée sur TMDB"
+            detail="SÃ©rie non trouvÃ©e sur OMDb"
         )
 
     return series
 
 
-@router.post("/tmdb/{tmdb_id}/import", response_model=SeriesResponse)
-async def import_series_from_tmdb(
-    tmdb_id: int,
-    import_seasons: bool = Query(False, description="Importer également les saisons et épisodes"),
-    language: str = Query("fr-FR"),
+@router.post("/omdb/imdb/{imdb_id}/import", response_model=SeriesResponse)
+async def import_series_from_omdb(
+    imdb_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Importer une série depuis TMDB
-
-    Args:
-        tmdb_id: ID TMDB de la série
-        import_seasons: Si True, importe également les saisons et épisodes
-        language: Code de langue
+    Importer une sÃ©rie depuis OMDb par ID IMDb
     """
-    if not tmdb_service:
+    if not omdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
+            detail="Service OMDb non disponible"
         )
 
-    # Vérifier si la série existe déjà
-    existing = db.query(Series).filter(Series.tmdb_id == tmdb_id).first()
+    # VÃ©rifier si la sÃ©rie existe dÃ©jÃ 
+    existing = db.query(Series).filter(Series.imdb_id == imdb_id).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cette série existe déjà dans la base de données"
+            detail="Cette sÃ©rie existe dÃ©jÃ  dans la base de donnÃ©es"
         )
 
-    # Récupérer les détails depuis TMDB
-    tmdb_data = await tmdb_service.get_tv_details(tmdb_id, language=language)
+    # RÃ©cupÃ©rer les dÃ©tails depuis OMDb
+    omdb_data = await omdb_service.get_by_imdb_id(imdb_id, plot="full")
 
-    if not tmdb_data:
+    if not omdb_data or omdb_data.get("Type") != "series":
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Série non trouvée sur TMDB"
+            detail="SÃ©rie non trouvÃ©e sur OMDb"
         )
 
-    # Créer le slug
+    # CrÃ©er le slug
     from slugify import slugify
-    slug = slugify(tmdb_data.get("name", ""))
+    name = omdb_data.get("Title", "")
+    slug = slugify(name)
 
-    # Vérifier l'unicité du slug
+    # VÃ©rifier l'unicitÃ© du slug
     slug_base = slug
     counter = 1
     while db.query(Series).filter(Series.slug == slug).first():
         slug = f"{slug_base}-{counter}"
         counter += 1
 
-    # Créer la série
+    # Parser les donnÃ©es OMDb
+    year = omdb_service.parse_year(omdb_data.get("Year"))
+    rating = omdb_service.parse_rating(omdb_data.get("imdbRating"))
+    total_seasons = int(omdb_data.get("totalSeasons", 0)) if omdb_data.get("totalSeasons") != "N/A" else 0
+
+    # Convertir la date de premiÃ¨re diffusion
+    from datetime import datetime
+    first_air_date = None
+    if omdb_data.get("Released") and omdb_data.get("Released") != "N/A":
+        try:
+            first_air_date = datetime.strptime(omdb_data["Released"], "%d %b %Y").date()
+        except:
+            pass
+
+    # CrÃ©er la sÃ©rie
     series = Series(
-        tmdb_id=tmdb_id,
-        imdb_id=tmdb_data.get("external_ids", {}).get("imdb_id"),
-        name=tmdb_data.get("name"),
-        original_name=tmdb_data.get("original_name"),
+        imdb_id=imdb_id,
+        name=name,
         slug=slug,
-        overview=tmdb_data.get("overview"),
-        tagline=tmdb_data.get("tagline"),
-        first_air_date=tmdb_data.get("first_air_date"),
-        last_air_date=tmdb_data.get("last_air_date"),
-        year=int(tmdb_data.get("first_air_date", "")[:4]) if tmdb_data.get("first_air_date") else None,
-        status=tmdb_data.get("status"),
-        in_production=tmdb_data.get("in_production", False),
-        number_of_seasons=tmdb_data.get("number_of_seasons", 0),
-        number_of_episodes=tmdb_data.get("number_of_episodes", 0),
-        original_language=tmdb_data.get("original_language"),
-        poster_path=tmdb_data.get("poster_path"),
-        backdrop_path=tmdb_data.get("backdrop_path"),
-        vote_average=tmdb_data.get("vote_average"),
-        vote_count=tmdb_data.get("vote_count"),
-        popularity=tmdb_data.get("popularity"),
-        adult=tmdb_data.get("adult", False)
+        overview=omdb_data.get("Plot") if omdb_data.get("Plot") != "N/A" else None,
+        first_air_date=first_air_date,
+        year=year,
+        number_of_seasons=total_seasons,
+        original_language=omdb_data.get("Language", "").split(",")[0].strip() if omdb_data.get("Language") != "N/A" else None,
+        poster_path=omdb_data.get("Poster") if omdb_data.get("Poster") != "N/A" else None,
+        vote_average=rating,
+        adult=omdb_data.get("Rated") == "R" or omdb_data.get("Rated") == "NC-17"
     )
 
     db.add(series)
     db.flush()
 
     # Ajouter les genres
-    for genre_data in tmdb_data.get("genres", []):
-        genre = db.query(Genre).filter(Genre.tmdb_id == genre_data["id"]).first()
-        if genre:
-            series.genres.append(genre)
+    genres = omdb_service.parse_genres(omdb_data.get("Genre"))
+    for genre_name in genres:
+        genre_slug = slugify(genre_name)
+        genre = db.query(Genre).filter(Genre.slug == genre_slug).first()
 
-    # Importer les saisons si demandé
-    if import_seasons:
-        for season_data in tmdb_data.get("seasons", []):
-            season_number = season_data.get("season_number", 0)
+        if not genre:
+            genre = Genre(name=genre_name, slug=genre_slug)
+            db.add(genre)
+            db.flush()
 
-            # Créer la saison
-            season = Season(
-                series_id=series.id,
-                tmdb_id=season_data.get("id"),
-                season_number=season_number,
-                name=season_data.get("name", f"Saison {season_number}"),
-                overview=season_data.get("overview"),
-                air_date=season_data.get("air_date"),
-                episode_count=season_data.get("episode_count", 0),
-                poster_path=season_data.get("poster_path")
-            )
-            db.add(season)
+        series.genres.append(genre)
 
     db.commit()
     db.refresh(series)

@@ -197,182 +197,161 @@ async def delete_movie(
     db.commit()
 
 
+
 # ============================================================================
-# TMDB INTEGRATION
+# OMDB INTEGRATION
 # ============================================================================
 
-@router.get("/tmdb/search", response_model=TMDBSearchResponse)
-async def search_movies_tmdb(
+@router.get("/omdb/search", response_model=OMDbSearchResponse)
+async def search_movies_omdb(
     query: str = Query(..., min_length=1),
-    page: int = Query(1, ge=1),
-    year: Optional[int] = None,
-    language: str = Query("fr-FR")
+    page: int = Query(1, ge=1, le=100),
+    year: Optional[int] = None
 ):
     """
-    Rechercher des films sur TMDB
+    Rechercher des films sur OMDb
 
     Args:
         query: Terme de recherche
-        page: Num�ro de page
-        year: Ann�e de sortie (optionnel)
-        language: Code de langue
+        page: Numéro de page (1-100)
+        year: Année de sortie (optionnel)
     """
-    if not tmdb_service:
+    if not omdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible. V�rifiez la configuration TMDB_API_KEY."
+            detail="Service OMDb non disponible. Vérifiez la configuration OMDB_API_KEY."
         )
 
-    results = await tmdb_service.search_movie(
+    results = await omdb_service.search_movies(
         query=query,
         page=page,
-        year=year,
-        language=language
+        year=year
     )
 
     if not results:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erreur lors de la recherche TMDB"
+            detail="Erreur lors de la recherche OMDb"
         )
 
-    return TMDBSearchResponse(
-        results=results.get("results", []),
-        total_results=results.get("total_results", 0),
-        page=results.get("page", 1),
-        total_pages=results.get("total_pages", 0)
-    )
+    return results
 
 
-@router.get("/tmdb/popular", response_model=TMDBSearchResponse)
-async def get_popular_movies_tmdb(
-    page: int = Query(1, ge=1),
-    language: str = Query("fr-FR")
+@router.get("/omdb/imdb/{imdb_id}", response_model=OMDbDetailResponse)
+async def get_movie_from_omdb(
+    imdb_id: str,
+    plot: str = Query("full", regex="^(short|full)$")
 ):
-    """Obtenir les films populaires depuis TMDB"""
-    if not tmdb_service:
+    """Obtenir les détails d'un film depuis OMDb par ID IMDb"""
+    if not omdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
+            detail="Service OMDb non disponible"
         )
 
-    results = await tmdb_service.get_popular_movies(page=page, language=language)
-
-    if not results:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erreur lors de la r�cup�ration des films populaires"
-        )
-
-    return TMDBSearchResponse(
-        results=results.get("results", []),
-        total_results=results.get("total_results", 0),
-        page=results.get("page", 1),
-        total_pages=results.get("total_pages", 0)
-    )
-
-
-@router.get("/tmdb/{tmdb_id}")
-async def get_movie_from_tmdb(
-    tmdb_id: int,
-    language: str = Query("fr-FR")
-):
-    """Obtenir les d�tails d'un film depuis TMDB"""
-    if not tmdb_service:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
-        )
-
-    movie = await tmdb_service.get_movie_details(tmdb_id, language=language)
+    movie = await omdb_service.get_by_imdb_id(imdb_id, plot=plot)
 
     if not movie:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouv� sur TMDB"
+            detail="Film non trouvé sur OMDb"
         )
 
     return movie
 
 
-@router.post("/tmdb/{tmdb_id}/import", response_model=MovieResponse)
-async def import_movie_from_tmdb(
-    tmdb_id: int,
-    language: str = Query("fr-FR"),
+@router.post("/omdb/imdb/{imdb_id}/import", response_model=MovieResponse)
+async def import_movie_from_omdb(
+    imdb_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Importer un film depuis TMDB
+    Importer un film depuis OMDb par ID IMDb
 
-    R�cup�re les informations du film depuis TMDB et le cr�e dans la base de donn�es.
+    Récupère les informations du film depuis OMDb et le crée dans la base de données.
     """
-    if not tmdb_service:
+    if not omdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible"
+            detail="Service OMDb non disponible"
         )
 
-    # V�rifier si le film existe d�j�
-    existing = db.query(Movie).filter(Movie.tmdb_id == tmdb_id).first()
+    # Vérifier si le film existe déjà
+    existing = db.query(Movie).filter(Movie.imdb_id == imdb_id).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ce film existe d�j� dans la base de donn�es"
+            detail="Ce film existe déjà dans la base de données"
         )
 
-    # R�cup�rer les d�tails depuis TMDB
-    tmdb_data = await tmdb_service.get_movie_details(tmdb_id, language=language)
+    # Récupérer les détails depuis OMDb
+    omdb_data = await omdb_service.get_by_imdb_id(imdb_id, plot="full")
 
-    if not tmdb_data:
+    if not omdb_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouv� sur TMDB"
+            detail="Film non trouvé sur OMDb"
         )
 
-    # Cr�er le slug
+    # Créer le slug
     from slugify import slugify
-    slug = slugify(tmdb_data.get("title", ""))
+    title = omdb_data.get("Title", "")
+    slug = slugify(title)
 
-    # V�rifier l'unicit� du slug
+    # Vérifier l'unicité du slug
     slug_base = slug
     counter = 1
     while db.query(Movie).filter(Movie.slug == slug).first():
         slug = f"{slug_base}-{counter}"
         counter += 1
 
-    # Cr�er le film
+    # Parser les données OMDb
+    year = omdb_service.parse_year(omdb_data.get("Year"))
+    runtime = omdb_service.parse_runtime(omdb_data.get("Runtime"))
+    rating = omdb_service.parse_rating(omdb_data.get("imdbRating"))
+
+    # Convertir la date de sortie
+    from datetime import datetime
+    release_date = None
+    if omdb_data.get("Released") and omdb_data.get("Released") != "N/A":
+        try:
+            release_date = datetime.strptime(omdb_data["Released"], "%d %b %Y").date()
+        except:
+            pass
+
+    # Créer le film
     movie = Movie(
-        tmdb_id=tmdb_id,
-        imdb_id=tmdb_data.get("external_ids", {}).get("imdb_id"),
-        title=tmdb_data.get("title"),
-        original_title=tmdb_data.get("original_title"),
+        imdb_id=imdb_id,
+        title=title,
         slug=slug,
-        overview=tmdb_data.get("overview"),
-        tagline=tmdb_data.get("tagline"),
-        release_date=tmdb_data.get("release_date"),
-        year=int(tmdb_data.get("release_date", "")[:4]) if tmdb_data.get("release_date") else None,
-        runtime=tmdb_data.get("runtime"),
-        original_language=tmdb_data.get("original_language"),
-        status=tmdb_data.get("status"),
-        budget=tmdb_data.get("budget"),
-        revenue=tmdb_data.get("revenue"),
-        poster_path=tmdb_data.get("poster_path"),
-        backdrop_path=tmdb_data.get("backdrop_path"),
-        vote_average=tmdb_data.get("vote_average"),
-        vote_count=tmdb_data.get("vote_count"),
-        popularity=tmdb_data.get("popularity"),
-        adult=tmdb_data.get("adult", False)
+        overview=omdb_data.get("Plot") if omdb_data.get("Plot") != "N/A" else None,
+        release_date=release_date,
+        year=year,
+        runtime=runtime,
+        original_language=omdb_data.get("Language", "").split(",")[0].strip() if omdb_data.get("Language") != "N/A" else None,
+        poster_path=omdb_data.get("Poster") if omdb_data.get("Poster") != "N/A" else None,
+        vote_average=rating,
+        adult=omdb_data.get("Rated") == "R" or omdb_data.get("Rated") == "NC-17"
     )
 
     db.add(movie)
-    db.flush()  # Pour obtenir l'ID du film
+    db.flush()
 
     # Ajouter les genres
-    for genre_data in tmdb_data.get("genres", []):
-        genre = db.query(Genre).filter(Genre.tmdb_id == genre_data["id"]).first()
-        if genre:
-            movie.genres.append(genre)
+    genres = omdb_service.parse_genres(omdb_data.get("Genre"))
+    for genre_name in genres:
+        from slugify import slugify
+        genre_slug = slugify(genre_name)
+        genre = db.query(Genre).filter(Genre.slug == genre_slug).first()
+
+        if not genre:
+            # Créer le genre s'il n'existe pas
+            genre = Genre(name=genre_name, slug=genre_slug)
+            db.add(genre)
+            db.flush()
+
+        movie.genres.append(genre)
 
     db.commit()
     db.refresh(movie)
