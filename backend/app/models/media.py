@@ -107,8 +107,8 @@ class Movie(Base):
     # Popularité
     popularity: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
 
-    # Métadonnées additionnelles
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    # Métadonnées additionnelles (JSON pour données externes)
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     # Adulte
     adult: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -191,8 +191,8 @@ class Series(Base):
     # Popularité
     popularity: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
 
-    # Métadonnées additionnelles
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    # Métadonnées additionnelles (JSON pour données externes)
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     # Adulte
     adult: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -334,8 +334,8 @@ class Person(Base):
 
     popularity: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
 
-    # Métadonnées
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    # Métadonnées (JSON pour données externes)
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     def __repr__(self) -> str:
         return f"Person(id={self.id}, name={self.name})"
