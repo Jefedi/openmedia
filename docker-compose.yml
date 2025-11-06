@@ -120,6 +120,9 @@ services:
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
       RATE_LIMIT_PER_HOUR: ${RATE_LIMIT_PER_HOUR:-1000}
 
+      # External APIs
+      OMDB_API_KEY: ${OMDB_API_KEY}
+
     volumes:
       - ./backend/app:/app/app:ro
       - ./backend/alembic:/app/alembic:ro
