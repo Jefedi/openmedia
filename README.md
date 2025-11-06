@@ -54,21 +54,19 @@ Une plateforme open-source tout-en-un pour la gestion et le suivi de films/séri
 - 4 GB RAM minimum
 - 20 GB espace disque
 
-### Installation en 3 Étapes
+### Installation en 2 Étapes
 
 ```bash
 # 1. Cloner le projet
 git clone https://github.com/Jefedi/openmedia.git
 cd openmedia
 
-# 2. Configurer l'environnement
-cp .env.example .env
-nano .env  # Modifier les mots de passe (OBLIGATOIRE)
-
-# 3. Déployer automatiquement
+# 2. Déployer (génère automatiquement un .env sécurisé)
 chmod +x deploy.sh
 ./deploy.sh
 ```
+
+> 💡 **Le script `deploy.sh` génère automatiquement un fichier `.env` avec des mots de passe aléatoires sécurisés !**
 
 **📖 [Guide de Démarrage Complet →](QUICKSTART.md)**
 
