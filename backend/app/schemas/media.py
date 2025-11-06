@@ -294,3 +294,67 @@ class TMDBSearchResponse(BaseModel):
     total_results: int
     page: int
     total_pages: int
+
+
+# ============================================================================
+# OMDB SEARCH SCHEMAS
+# ============================================================================
+
+class OMDbSearchResult(BaseModel):
+    """Schema pour un résultat de recherche OMDb"""
+    Title: str
+    Year: str
+    imdbID: str
+    Type: str  # "movie", "series", "episode"
+    Poster: Optional[str] = None
+
+    class Config:
+        # Permettre les noms de champs avec majuscules
+        populate_by_name = True
+
+
+class OMDbSearchResponse(BaseModel):
+    """Schema de réponse pour une recherche OMDb"""
+    Search: Optional[list[OMDbSearchResult]] = None
+    totalResults: str
+    Response: str
+
+    class Config:
+        populate_by_name = True
+
+
+class OMDbDetailResponse(BaseModel):
+    """Schema de réponse détaillée OMDb"""
+    Title: Optional[str] = None
+    Year: Optional[str] = None
+    Rated: Optional[str] = None
+    Released: Optional[str] = None
+    Runtime: Optional[str] = None
+    Genre: Optional[str] = None
+    Director: Optional[str] = None
+    Writer: Optional[str] = None
+    Actors: Optional[str] = None
+    Plot: Optional[str] = None
+    Language: Optional[str] = None
+    Country: Optional[str] = None
+    Awards: Optional[str] = None
+    Poster: Optional[str] = None
+    Ratings: Optional[list[dict]] = None
+    Metascore: Optional[str] = None
+    imdbRating: Optional[str] = None
+    imdbVotes: Optional[str] = None
+    imdbID: Optional[str] = None
+    Type: Optional[str] = None
+    DVD: Optional[str] = None
+    BoxOffice: Optional[str] = None
+    Production: Optional[str] = None
+    Website: Optional[str] = None
+    Response: Optional[str] = None
+    # Champs pour séries
+    totalSeasons: Optional[str] = None
+    # Champs pour saisons
+    Season: Optional[str] = None
+    Episodes: Optional[list[dict]] = None
+
+    class Config:
+        populate_by_name = True

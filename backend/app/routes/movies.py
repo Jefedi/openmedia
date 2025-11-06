@@ -12,10 +12,11 @@ from app.schemas.media import (
     MovieCreate,
     MovieUpdate,
     MovieListResponse,
-    TMDBSearchResponse
+    OMDbSearchResponse,
+    OMDbDetailResponse
 )
 from app.routes.auth import get_current_user
-from app.services.tmdb import tmdb_service
+from app.services.omdb import omdb_service
 
 router = APIRouter(prefix="/movies", tags=["Movies"])
 
@@ -39,11 +40,11 @@ async def list_movies(
     Liste des films avec pagination et filtres
 
     Args:
-        page: Numéro de page
-        page_size: Nombre d'éléments par page
+        page: Numï¿½ro de page
+        page_size: Nombre d'ï¿½lï¿½ments par page
         search: Recherche par titre
         genre: Filtrer par genre (slug)
-        year: Filtrer par année de sortie
+        year: Filtrer par annï¿½e de sortie
         sort_by: Trier par (title, release_date, vote_average, popularity, created_at)
         order: Ordre de tri (asc, desc)
     """
@@ -59,7 +60,7 @@ async def list_movies(
     if genre:
         query = query.join(Movie.genres).filter(Genre.slug == genre)
 
-    # Filtrer par année
+    # Filtrer par annï¿½e
     if year:
         query = query.filter(Movie.year == year)
 
@@ -95,7 +96,7 @@ async def get_movie(
     if not movie:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouvé"
+            detail="Film non trouvï¿½"
         )
 
     return movie
@@ -108,27 +109,27 @@ async def create_movie(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Créer un nouveau film
+    Crï¿½er un nouveau film
 
-    Nécessite une authentification.
+    Nï¿½cessite une authentification.
     """
-    # Vérifier si le film existe déjà (par TMDB ID ou slug)
+    # Vï¿½rifier si le film existe dï¿½jï¿½ (par TMDB ID ou slug)
     if movie_data.tmdb_id:
         existing = db.query(Movie).filter(Movie.tmdb_id == movie_data.tmdb_id).first()
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Un film avec cet ID TMDB existe déjà"
+                detail="Un film avec cet ID TMDB existe dï¿½jï¿½"
             )
 
     existing_slug = db.query(Movie).filter(Movie.slug == movie_data.slug).first()
     if existing_slug:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Un film avec ce slug existe déjà"
+            detail="Un film avec ce slug existe dï¿½jï¿½"
         )
 
-    # Créer le film
+    # Crï¿½er le film
     movie = Movie(**movie_data.model_dump())
     db.add(movie)
     db.commit()
@@ -145,19 +146,19 @@ async def update_movie(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Mettre à jour un film
+    Mettre ï¿½ jour un film
 
-    Nécessite une authentification.
+    Nï¿½cessite une authentification.
     """
     movie = db.query(Movie).filter(Movie.id == movie_id).first()
 
     if not movie:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouvé"
+            detail="Film non trouvï¿½"
         )
 
-    # Mettre à jour les champs fournis
+    # Mettre ï¿½ jour les champs fournis
     for field, value in movie_data.model_dump(exclude_unset=True).items():
         setattr(movie, field, value)
 
@@ -176,7 +177,7 @@ async def delete_movie(
     """
     Supprimer un film
 
-    Nécessite une authentification et les droits admin.
+    Nï¿½cessite une authentification et les droits admin.
     """
     if not current_user.is_superuser:
         raise HTTPException(
@@ -189,7 +190,7 @@ async def delete_movie(
     if not movie:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouvé"
+            detail="Film non trouvï¿½"
         )
 
     db.delete(movie)
@@ -212,14 +213,14 @@ async def search_movies_tmdb(
 
     Args:
         query: Terme de recherche
-        page: Numéro de page
-        year: Année de sortie (optionnel)
+        page: Numï¿½ro de page
+        year: Annï¿½e de sortie (optionnel)
         language: Code de langue
     """
     if not tmdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service TMDB non disponible. Vérifiez la configuration TMDB_API_KEY."
+            detail="Service TMDB non disponible. Vï¿½rifiez la configuration TMDB_API_KEY."
         )
 
     results = await tmdb_service.search_movie(
@@ -260,7 +261,7 @@ async def get_popular_movies_tmdb(
     if not results:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erreur lors de la récupération des films populaires"
+            detail="Erreur lors de la rï¿½cupï¿½ration des films populaires"
         )
 
     return TMDBSearchResponse(
@@ -276,7 +277,7 @@ async def get_movie_from_tmdb(
     tmdb_id: int,
     language: str = Query("fr-FR")
 ):
-    """Obtenir les détails d'un film depuis TMDB"""
+    """Obtenir les dï¿½tails d'un film depuis TMDB"""
     if not tmdb_service:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -288,7 +289,7 @@ async def get_movie_from_tmdb(
     if not movie:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouvé sur TMDB"
+            detail="Film non trouvï¿½ sur TMDB"
         )
 
     return movie
@@ -304,7 +305,7 @@ async def import_movie_from_tmdb(
     """
     Importer un film depuis TMDB
 
-    Récupère les informations du film depuis TMDB et le crée dans la base de données.
+    Rï¿½cupï¿½re les informations du film depuis TMDB et le crï¿½e dans la base de donnï¿½es.
     """
     if not tmdb_service:
         raise HTTPException(
@@ -312,35 +313,35 @@ async def import_movie_from_tmdb(
             detail="Service TMDB non disponible"
         )
 
-    # Vérifier si le film existe déjà
+    # Vï¿½rifier si le film existe dï¿½jï¿½
     existing = db.query(Movie).filter(Movie.tmdb_id == tmdb_id).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ce film existe déjà dans la base de données"
+            detail="Ce film existe dï¿½jï¿½ dans la base de donnï¿½es"
         )
 
-    # Récupérer les détails depuis TMDB
+    # Rï¿½cupï¿½rer les dï¿½tails depuis TMDB
     tmdb_data = await tmdb_service.get_movie_details(tmdb_id, language=language)
 
     if not tmdb_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Film non trouvé sur TMDB"
+            detail="Film non trouvï¿½ sur TMDB"
         )
 
-    # Créer le slug
+    # Crï¿½er le slug
     from slugify import slugify
     slug = slugify(tmdb_data.get("title", ""))
 
-    # Vérifier l'unicité du slug
+    # Vï¿½rifier l'unicitï¿½ du slug
     slug_base = slug
     counter = 1
     while db.query(Movie).filter(Movie.slug == slug).first():
         slug = f"{slug_base}-{counter}"
         counter += 1
 
-    # Créer le film
+    # Crï¿½er le film
     movie = Movie(
         tmdb_id=tmdb_id,
         imdb_id=tmdb_data.get("external_ids", {}).get("imdb_id"),
