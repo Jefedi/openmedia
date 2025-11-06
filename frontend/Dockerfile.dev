@@ -13,7 +13,7 @@ RUN npm install
 COPY next.config.js ./
 COPY tailwind.config.js ./
 COPY tsconfig.json ./
-COPY postcss.config.js* ./
+COPY postcss.config.* ./
 
 # Le code source sera monté via volume pour hot-reload
 

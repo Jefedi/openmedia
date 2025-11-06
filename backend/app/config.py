@@ -223,9 +223,6 @@ class Settings(BaseSettings):
     # =============================================================================
     IMDB_DATASETS_PATH: str = "/data/imdb"
 
-    class Config:
-        case_sensitive = True
-
 
 # Instance globale des settings
 settings = Settings()
