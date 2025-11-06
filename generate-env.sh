@@ -15,6 +15,7 @@ REDIS_PASSWORD=$(openssl rand -hex 32)
 MEILI_MASTER_KEY=$(openssl rand -hex 32)
 SECRET_KEY=$(openssl rand -hex 32)
 JWT_SECRET_KEY=$(openssl rand -hex 32)
+FIRST_SUPERUSER_PASSWORD=$(openssl rand -hex 32)
 
 # Créer le fichier .env
 cat > $ENV_FILE << EOF
@@ -83,6 +84,12 @@ CELERY_LOG_LEVEL=debug
 CELERY_CONCURRENCY=2
 
 # =============================================================================
+# FIRST SUPERUSER (Admin Account)
+# =============================================================================
+FIRST_SUPERUSER_EMAIL=admin@openmedia.local
+FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
+
+# =============================================================================
 # EXTERNAL APIs (Optionnel)
 # =============================================================================
 # TMDB_API_KEY=
@@ -103,6 +110,10 @@ echo "REDIS_PASSWORD=${REDIS_PASSWORD}"
 echo "MEILI_MASTER_KEY=${MEILI_MASTER_KEY}"
 echo "SECRET_KEY=${SECRET_KEY}"
 echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
+echo ""
+echo "👤 ADMIN CREDENTIALS:"
+echo "FIRST_SUPERUSER_EMAIL=admin@openmedia.local"
+echo "FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "💾 Fichier sauvegardé : $ENV_FILE"

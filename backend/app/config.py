@@ -208,7 +208,7 @@ class Settings(BaseSettings):
     # FIRST USER (Super Admin)
     # =============================================================================
     FIRST_SUPERUSER_EMAIL: str = "admin@openmedia.local"
-    FIRST_SUPERUSER_PASSWORD: str = secrets.token_urlsafe(32)
+    FIRST_SUPERUSER_PASSWORD: str  # Doit être défini dans .env
 
     # =============================================================================
     # PAGINATION
