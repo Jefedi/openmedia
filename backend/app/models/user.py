@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 import secrets
 
-from sqlalchemy import Boolean, String, Integer, DateTime, Text, JSON
+from sqlalchemy import Boolean, String, Integer, DateTime, Text, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -67,7 +67,7 @@ class APIKey(Base):
     __tablename__ = "api_keys"
 
     # Relations
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     user: Mapped["User"] = relationship("User", back_populates="api_keys")
 
     # Clé
@@ -117,7 +117,7 @@ class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
     # Relations
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     user: Mapped["User"] = relationship("User", back_populates="refresh_tokens")
 
     # Token
