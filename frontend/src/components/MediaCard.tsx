@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface MediaCardProps {
   id: number;
@@ -21,20 +20,19 @@ export default function MediaCard({
   overview
 }: MediaCardProps) {
   const href = type === 'movie' ? `/movies/${id}` : `/series/${id}`;
-  const placeholderImage = '/placeholder-poster.jpg';
+  const hasValidPoster = posterPath && posterPath !== 'N/A' && !posterPath.includes('null');
 
   return (
     <Link href={href}>
       <div className="group relative bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all duration-300 cursor-pointer">
         {/* Poster */}
         <div className="relative aspect-[2/3] bg-gray-700">
-          {posterPath ? (
-            <Image
+          {hasValidPoster ? (
+            <img
               src={posterPath}
               alt={title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-500">

@@ -37,10 +37,29 @@ const nextConfig = {
 
   // Optimisation des images
   images: {
-    domains: [
-      'image.tmdb.org',  // TMDB images
-      'localhost',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ia.media-imdb.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
+    unoptimized: false,
     formats: ['image/webp', 'image/avif'],
   },
 

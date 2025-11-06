@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+
 
 interface Movie {
   id: number;
@@ -135,13 +135,7 @@ export default function MovieDetailPage() {
         {/* Backdrop Image */}
         {backdropUrl && (
           <div className="absolute inset-0 w-full h-full">
-            <Image
-              src={backdropUrl}
-              alt={movie.title}
-              fill
-              className="object-cover opacity-30"
-              priority
-            />
+            <img src={backdropUrl} alt={movie?.title || series?.name || ""} className="object-cover opacity-30" />
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/95 to-gray-900/80"></div>
           </div>
         )}
@@ -152,13 +146,7 @@ export default function MovieDetailPage() {
             {/* Poster */}
             <div className="flex flex-col items-center md:items-start">
               <div className="relative w-full max-w-[300px] aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
-                <Image
-                  src={posterUrl}
-                  alt={movie.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                <img src={posterUrl} alt={movie?.title || series?.name || ""} className="w-full h-full object-cover" />
               </div>
 
               {/* IMDb Link */}
