@@ -24,7 +24,7 @@ def search_local_movies(db: Session, query: str, limit: int = 10) -> List[Movie]
 
 
 def search_local_series(db: Session, query: str, limit: int = 10) -> List[Series]:
-    """Rechercher des séries dans la BDD locale"""
+    """Rechercher des sÃ©ries dans la BDD locale"""
     return db.query(Series).filter(
         or_(
             func.lower(Series.name).contains(query.lower()),
@@ -38,17 +38,17 @@ async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Mov
     if not omdb_service:
         return None
 
-    # Vérifier si le film existe déjà
+    # VÃ©rifier si le film existe dÃ©jÃ 
     existing = db.query(Movie).filter(Movie.imdb_id == imdb_id).first()
     if existing:
         return existing
 
-    # Récupérer depuis OMDb
+    # RÃ©cupÃ©rer depuis OMDb
     omdb_data = await omdb_service.get_by_imdb_id(imdb_id, plot="full")
     if not omdb_data or omdb_data.get("Type") != "movie":
         return None
 
-    # Créer le slug
+    # CrÃ©er le slug
     title = omdb_data.get("Title", "")
     slug = slugify(title)
     slug_base = slug
@@ -57,7 +57,7 @@ async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Mov
         slug = f"{slug_base}-{counter}"
         counter += 1
 
-    # Parser les données
+    # Parser les donnÃ©es
     year = omdb_service.parse_year(omdb_data.get("Year"))
     runtime = omdb_service.parse_runtime(omdb_data.get("Runtime"))
     rating = omdb_service.parse_rating(omdb_data.get("imdbRating"))
@@ -70,7 +70,7 @@ async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Mov
         except:
             pass
 
-    # Créer le film
+    # CrÃ©er le film
     movie = Movie(
         imdb_id=imdb_id,
         title=title,
@@ -105,21 +105,21 @@ async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Mov
 
 
 async def import_series_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Series]:
-    """Importer automatiquement une série depuis OMDb"""
+    """Importer automatiquement une sÃ©rie depuis OMDb"""
     if not omdb_service:
         return None
 
-    # Vérifier si la série existe déjà
+    # VÃ©rifier si la sÃ©rie existe dÃ©jÃ 
     existing = db.query(Series).filter(Series.imdb_id == imdb_id).first()
     if existing:
         return existing
 
-    # Récupérer depuis OMDb
+    # RÃ©cupÃ©rer depuis OMDb
     omdb_data = await omdb_service.get_by_imdb_id(imdb_id, plot="full")
     if not omdb_data or omdb_data.get("Type") != "series":
         return None
 
-    # Créer le slug
+    # CrÃ©er le slug
     name = omdb_data.get("Title", "")
     slug = slugify(name)
     slug_base = slug
@@ -128,12 +128,12 @@ async def import_series_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Se
         slug = f"{slug_base}-{counter}"
         counter += 1
 
-    # Parser les données
+    # Parser les donnÃ©es
     year = omdb_service.parse_year(omdb_data.get("Year"))
     rating = omdb_service.parse_rating(omdb_data.get("imdbRating"))
     total_seasons = int(omdb_data.get("totalSeasons", 0)) if omdb_data.get("totalSeasons") != "N/A" else 0
 
-    # Date de première diffusion
+    # Date de premiÃ¨re diffusion
     first_air_date = None
     if omdb_data.get("Released") and omdb_data.get("Released") != "N/A":
         try:
@@ -141,7 +141,7 @@ async def import_series_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Se
         except:
             pass
 
-    # Créer la série
+    # CrÃ©er la sÃ©rie
     series = Series(
         imdb_id=imdb_id,
         name=name,
@@ -184,11 +184,11 @@ async def smart_search(
     Recherche intelligente avec cache BDD
 
     1. Cherche d'abord dans la BDD locale
-    2. Si pas de résultats, cherche sur OMDb
-    3. Importe automatiquement les résultats OMDb dans la BDD
-    4. Retourne les résultats combinés
+    2. Si pas de rÃ©sultats, cherche sur OMDb
+    3. Importe automatiquement les rÃ©sultats OMDb dans la BDD
+    4. Retourne les rÃ©sultats combinÃ©s
 
-    Cela permet d'économiser les requêtes API OMDb.
+    Cela permet d'Ã©conomiser les requÃªtes API OMDb.
     """
     results = {
         "query": q,
@@ -203,7 +203,7 @@ async def smart_search(
     local_series = search_local_series(db, q, limit=10)
 
     if local_movies or local_series:
-        # On a des résultats en cache!
+        # On a des rÃ©sultats en cache!
         results["from_cache"] = True
         results["movies"] = [
             {
@@ -233,7 +233,7 @@ async def smart_search(
         ]
         return results
 
-    # 2. Pas de résultats locaux, chercher sur OMDb
+    # 2. Pas de rÃ©sultats locaux, chercher sur OMDb
     if not omdb_service:
         results["error"] = "Service OMDb non disponible"
         return results
@@ -241,13 +241,13 @@ async def smart_search(
     omdb_results = await omdb_service.search(q, page=1)
 
     if not omdb_results or not omdb_results.get("Search"):
-        results["message"] = "Aucun résultat trouvé"
+        results["message"] = "Aucun rÃ©sultat trouvÃ©"
         return results
 
     results["from_omdb"] = True
 
-    # 3. Importer automatiquement chaque résultat dans la BDD
-    for item in omdb_results.get("Search", [])[:10]:  # Limiter à 10 pour ne pas surcharger
+    # 3. Importer automatiquement chaque rÃ©sultat dans la BDD
+    for item in omdb_results.get("Search", [])[:10]:  # Limiter Ã  10 pour ne pas surcharger
         imdb_id = item.get("imdbID")
         media_type = item.get("Type")
 
