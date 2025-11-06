@@ -36,13 +36,18 @@ export default function Home() {
               <span className="text-3xl">🎬</span>
               <h1 className="text-2xl font-bold">OpenMedia</h1>
             </div>
-            <nav className="flex gap-4">
+            <nav className="flex gap-3">
               <a
-                href="http://localhost:18000/api/v1/docs"
-                target="_blank"
+                href="/login"
+                className="px-4 py-2 rounded-lg border border-gray-600 hover:border-gray-500 transition"
+              >
+                Login
+              </a>
+              <a
+                href="/register"
                 className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
               >
-                API Docs
+                Sign Up
               </a>
             </nav>
           </div>
