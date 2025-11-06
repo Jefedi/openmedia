@@ -75,6 +75,10 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
             detail="Username already taken"
         )
 
+    # Check if this is the first user (becomes site owner/admin)
+    user_count = db.query(User).count()
+    is_first_user = (user_count == 0)
+
     # Create new user
     new_user = User(
         email=user_data.email,
@@ -82,8 +86,8 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
         hashed_password=get_password_hash(user_data.password),
         full_name=user_data.full_name,
         is_active=True,
-        is_verified=False,
-        is_superuser=False,
+        is_verified=is_first_user,  # First user is auto-verified
+        is_superuser=is_first_user,  # First user becomes site owner/admin
     )
 
     db.add(new_user)

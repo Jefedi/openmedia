@@ -205,10 +205,12 @@ class Settings(BaseSettings):
     BACKUP_RETENTION_DAYS: int = 30
 
     # =============================================================================
-    # FIRST USER (Super Admin)
+    # FIRST USER (Super Admin) - DEPRECATED
     # =============================================================================
-    FIRST_SUPERUSER_EMAIL: str = "admin@openmedia.local"
-    FIRST_SUPERUSER_PASSWORD: str  # Doit être défini dans .env
+    # Note: First user to register becomes site owner automatically
+    # These settings are kept for backward compatibility but not used
+    FIRST_SUPERUSER_EMAIL: Optional[str] = None
+    FIRST_SUPERUSER_PASSWORD: Optional[str] = None
 
     # =============================================================================
     # PAGINATION

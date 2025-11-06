@@ -15,7 +15,6 @@ REDIS_PASSWORD=$(openssl rand -hex 32)
 MEILI_MASTER_KEY=$(openssl rand -hex 32)
 SECRET_KEY=$(openssl rand -hex 32)
 JWT_SECRET_KEY=$(openssl rand -hex 32)
-FIRST_SUPERUSER_PASSWORD=$(openssl rand -hex 32)
 
 # Créer le fichier .env
 cat > $ENV_FILE << EOF
@@ -84,10 +83,12 @@ CELERY_LOG_LEVEL=debug
 CELERY_CONCURRENCY=2
 
 # =============================================================================
-# FIRST SUPERUSER (Admin Account)
+# FIRST SUPERUSER (Admin Account) - DEPRECATED
 # =============================================================================
-FIRST_SUPERUSER_EMAIL=admin@openmedia.local
-FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
+# Note: Le premier utilisateur à s'enregistrer devient automatiquement le propriétaire/admin
+# Ces paramètres ne sont plus nécessaires
+# FIRST_SUPERUSER_EMAIL=admin@openmedia.local
+# FIRST_SUPERUSER_PASSWORD=
 
 # =============================================================================
 # EXTERNAL APIs (Optionnel)
@@ -110,11 +111,11 @@ echo "REDIS_PASSWORD=${REDIS_PASSWORD}"
 echo "MEILI_MASTER_KEY=${MEILI_MASTER_KEY}"
 echo "SECRET_KEY=${SECRET_KEY}"
 echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
-echo ""
-echo "👤 ADMIN CREDENTIALS:"
-echo "FIRST_SUPERUSER_EMAIL=admin@openmedia.local"
-echo "FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "👤 COMPTE ADMINISTRATEUR:"
+echo "Le premier utilisateur à s'enregistrer deviendra automatiquement le propriétaire/admin du site."
+echo "Après le lancement, visitez: http://localhost:13000/register"
 echo ""
 echo "💾 Fichier sauvegardé : $ENV_FILE"
 echo "🔒 Permissions : 600 (lecture/écriture propriétaire uniquement)"
