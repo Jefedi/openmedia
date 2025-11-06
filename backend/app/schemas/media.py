@@ -1,4 +1,4 @@
-"""Schemas pour les films, sÈries et Èpisodes"""
+"""Schemas pour les films, s√©ries et √©pisodes"""
 from datetime import date
 from typing import Optional
 from decimal import Decimal
@@ -16,12 +16,12 @@ class GenreBase(BaseModel):
 
 
 class GenreCreate(GenreBase):
-    """Schema pour crÈer un genre"""
+    """Schema pour cr√©er un genre"""
     tmdb_id: Optional[int] = None
 
 
 class GenreResponse(GenreBase):
-    """Schema de rÈponse pour un genre"""
+    """Schema de r√©ponse pour un genre"""
     id: int
     tmdb_id: Optional[int] = None
 
@@ -51,7 +51,7 @@ class MovieBase(BaseModel):
 
 
 class MovieCreate(MovieBase):
-    """Schema pour crÈer un film"""
+    """Schema pour cr√©er un film"""
     imdb_id: Optional[str] = None
     tmdb_id: Optional[int] = None
     slug: str
@@ -62,7 +62,7 @@ class MovieCreate(MovieBase):
 
 
 class MovieUpdate(BaseModel):
-    """Schema pour mettre ‡ jour un film"""
+    """Schema pour mettre √† jour un film"""
     title: Optional[str] = None
     original_title: Optional[str] = None
     overview: Optional[str] = None
@@ -75,7 +75,7 @@ class MovieUpdate(BaseModel):
 
 
 class MovieResponse(MovieBase):
-    """Schema de rÈponse pour un film"""
+    """Schema de r√©ponse pour un film"""
     id: int
     slug: str
     year: Optional[int] = None
@@ -93,7 +93,7 @@ class MovieResponse(MovieBase):
 
 
 class MovieListResponse(BaseModel):
-    """Schema de rÈponse pour une liste de films"""
+    """Schema de r√©ponse pour une liste de films"""
     movies: list[MovieResponse]
     total: int
     page: int
@@ -105,7 +105,7 @@ class MovieListResponse(BaseModel):
 # ============================================================================
 
 class SeriesBase(BaseModel):
-    """Schema de base pour une sÈrie"""
+    """Schema de base pour une s√©rie"""
     name: str
     original_name: Optional[str] = None
     overview: Optional[str] = None
@@ -123,7 +123,7 @@ class SeriesBase(BaseModel):
 
 
 class SeriesCreate(SeriesBase):
-    """Schema pour crÈer une sÈrie"""
+    """Schema pour cr√©er une s√©rie"""
     imdb_id: Optional[str] = None
     tmdb_id: Optional[int] = None
     slug: str
@@ -134,7 +134,7 @@ class SeriesCreate(SeriesBase):
 
 
 class SeriesUpdate(BaseModel):
-    """Schema pour mettre ‡ jour une sÈrie"""
+    """Schema pour mettre √† jour une s√©rie"""
     name: Optional[str] = None
     original_name: Optional[str] = None
     overview: Optional[str] = None
@@ -150,7 +150,7 @@ class SeriesUpdate(BaseModel):
 
 
 class SeriesResponse(SeriesBase):
-    """Schema de rÈponse pour une sÈrie"""
+    """Schema de r√©ponse pour une s√©rie"""
     id: int
     slug: str
     year: Optional[int] = None
@@ -168,7 +168,7 @@ class SeriesResponse(SeriesBase):
 
 
 class SeriesListResponse(BaseModel):
-    """Schema de rÈponse pour une liste de sÈries"""
+    """Schema de r√©ponse pour une liste de s√©ries"""
     series: list[SeriesResponse]
     total: int
     page: int
@@ -190,13 +190,13 @@ class SeasonBase(BaseModel):
 
 
 class SeasonCreate(SeasonBase):
-    """Schema pour crÈer une saison"""
+    """Schema pour cr√©er une saison"""
     series_id: int
     tmdb_id: Optional[int] = None
 
 
 class SeasonUpdate(BaseModel):
-    """Schema pour mettre ‡ jour une saison"""
+    """Schema pour mettre √† jour une saison"""
     name: Optional[str] = None
     overview: Optional[str] = None
     air_date: Optional[date] = None
@@ -205,7 +205,7 @@ class SeasonUpdate(BaseModel):
 
 
 class SeasonResponse(SeasonBase):
-    """Schema de rÈponse pour une saison"""
+    """Schema de r√©ponse pour une saison"""
     id: int
     series_id: int
     tmdb_id: Optional[int] = None
@@ -221,7 +221,7 @@ class SeasonResponse(SeasonBase):
 # ============================================================================
 
 class EpisodeBase(BaseModel):
-    """Schema de base pour un Èpisode"""
+    """Schema de base pour un √©pisode"""
     name: str
     episode_number: int
     season_number: int
@@ -232,7 +232,7 @@ class EpisodeBase(BaseModel):
 
 
 class EpisodeCreate(EpisodeBase):
-    """Schema pour crÈer un Èpisode"""
+    """Schema pour cr√©er un √©pisode"""
     series_id: int
     season_id: int
     imdb_id: Optional[str] = None
@@ -242,7 +242,7 @@ class EpisodeCreate(EpisodeBase):
 
 
 class EpisodeUpdate(BaseModel):
-    """Schema pour mettre ‡ jour un Èpisode"""
+    """Schema pour mettre √† jour un √©pisode"""
     name: Optional[str] = None
     overview: Optional[str] = None
     air_date: Optional[date] = None
@@ -251,7 +251,7 @@ class EpisodeUpdate(BaseModel):
 
 
 class EpisodeResponse(EpisodeBase):
-    """Schema de rÈponse pour un Èpisode"""
+    """Schema de r√©ponse pour un √©pisode"""
     id: int
     series_id: int
     season_id: int
@@ -271,16 +271,16 @@ class EpisodeResponse(EpisodeBase):
 # ============================================================================
 
 class TMDBSearchResult(BaseModel):
-    """Schema pour un rÈsultat de recherche TMDB"""
+    """Schema pour un r√©sultat de recherche TMDB"""
     id: int
     media_type: str  # "movie" or "tv"
     title: Optional[str] = None  # Pour les films
-    name: Optional[str] = None  # Pour les sÈries
+    name: Optional[str] = None  # Pour les s√©ries
     original_title: Optional[str] = None
     original_name: Optional[str] = None
     overview: Optional[str] = None
     release_date: Optional[str] = None  # Pour les films
-    first_air_date: Optional[str] = None  # Pour les sÈries
+    first_air_date: Optional[str] = None  # Pour les s√©ries
     poster_path: Optional[str] = None
     backdrop_path: Optional[str] = None
     vote_average: Optional[float] = None
@@ -289,7 +289,7 @@ class TMDBSearchResult(BaseModel):
 
 
 class TMDBSearchResponse(BaseModel):
-    """Schema de rÈponse pour une recherche TMDB"""
+    """Schema de r√©ponse pour une recherche TMDB"""
     results: list[TMDBSearchResult]
     total_results: int
     page: int
@@ -301,7 +301,7 @@ class TMDBSearchResponse(BaseModel):
 # ============================================================================
 
 class OMDbSearchResult(BaseModel):
-    """Schema pour un r√©sultat de recherche OMDb"""
+    """Schema pour un r√É¬©sultat de recherche OMDb"""
     Title: str
     Year: str
     imdbID: str
@@ -314,7 +314,7 @@ class OMDbSearchResult(BaseModel):
 
 
 class OMDbSearchResponse(BaseModel):
-    """Schema de r√©ponse pour une recherche OMDb"""
+    """Schema de r√É¬©ponse pour une recherche OMDb"""
     Search: Optional[list[OMDbSearchResult]] = None
     totalResults: str
     Response: str
@@ -324,7 +324,7 @@ class OMDbSearchResponse(BaseModel):
 
 
 class OMDbDetailResponse(BaseModel):
-    """Schema de r√©ponse d√©taill√©e OMDb"""
+    """Schema de r√É¬©ponse d√É¬©taill√É¬©e OMDb"""
     Title: Optional[str] = None
     Year: Optional[str] = None
     Rated: Optional[str] = None
@@ -350,7 +350,7 @@ class OMDbDetailResponse(BaseModel):
     Production: Optional[str] = None
     Website: Optional[str] = None
     Response: Optional[str] = None
-    # Champs pour s√©ries
+    # Champs pour s√É¬©ries
     totalSeasons: Optional[str] = None
     # Champs pour saisons
     Season: Optional[str] = None
