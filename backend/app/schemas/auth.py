@@ -1,13 +1,24 @@
 """Authentication schemas"""
+import re
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class UserRegister(BaseModel):
     """Schema for user registration"""
-    email: EmailStr
+    email: str
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=8)
     full_name: str | None = None
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format (allow .local for development)"""
+        # Basic email regex that allows .local domains
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, v):
+            raise ValueError("Invalid email format")
+        return v.lower()
 
     @field_validator("username")
     @classmethod
@@ -20,8 +31,18 @@ class UserRegister(BaseModel):
 
 class UserLogin(BaseModel):
     """Schema for user login"""
-    email: EmailStr
+    email: str
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Validate email format (allow .local for development)"""
+        # Basic email regex that allows .local domains
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, v):
+            raise ValueError("Invalid email format")
+        return v.lower()
 
 
 class Token(BaseModel):
