@@ -3,9 +3,13 @@ set -e
 
 echo "🔄 Initialisation de la base de données OpenMedia..."
 
+# Reconstruire le conteneur API pour avoir les derniers fichiers
+echo "🔨 Reconstruction du conteneur API avec les derniers fichiers..."
+docker compose up -d --build api
+
 # Attendre que l'API soit prête
 echo "⏳ Attente du démarrage de l'API..."
-sleep 5
+sleep 10
 
 # Vérifier que l'API est accessible
 if ! docker compose exec api curl -f http://localhost:8000/health > /dev/null 2>&1; then
