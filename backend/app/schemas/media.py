@@ -1,5 +1,5 @@
 """Schemas pour les films, séries et épisodes"""
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 from decimal import Decimal
 from pydantic import BaseModel, Field
@@ -85,8 +85,8 @@ class MovieResponse(MovieBase):
     vote_count: int
     popularity: Optional[Decimal] = None
     genres: list[GenreResponse] = []
-    created_at: date
-    updated_at: date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -160,8 +160,8 @@ class SeriesResponse(SeriesBase):
     vote_count: int
     popularity: Optional[Decimal] = None
     genres: list[GenreResponse] = []
-    created_at: date
-    updated_at: date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -209,8 +209,8 @@ class SeasonResponse(SeasonBase):
     id: int
     series_id: int
     tmdb_id: Optional[int] = None
-    created_at: date
-    updated_at: date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -259,8 +259,8 @@ class EpisodeResponse(EpisodeBase):
     tmdb_id: Optional[int] = None
     vote_average: Optional[Decimal] = None
     vote_count: int
-    created_at: date
-    updated_at: date
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
