@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import MediaCard from '@/components/MediaCard';
+import Header from '@/components/Header';
 
 interface Movie {
   id: number;
@@ -46,42 +47,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      {/* Header */}
-      <header className="border-b border-gray-700 bg-black/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition">
-              <span className="text-3xl">🎬</span>
-              <h1 className="text-2xl font-bold">OpenMedia</h1>
-            </Link>
-            <nav className="flex gap-6 items-center">
-              <Link href="/movies" className="hover:text-blue-400 transition">
-                Films
-              </Link>
-              <Link href="/series" className="hover:text-blue-400 transition">
-                Séries
-              </Link>
-              <Link href="/search" className="hover:text-blue-400 transition">
-                Recherche
-              </Link>
-              <div className="flex gap-3 ml-4">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-lg border border-gray-600 hover:border-gray-500 transition"
-                >
-                  Connexion
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
-                >
-                  S'inscrire
-                </Link>
-              </div>
-            </nav>
-          </div>
-        </div>
-      </header>
+      {/* Header with Search Bar */}
+      <Header />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">

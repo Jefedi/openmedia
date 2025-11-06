@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import MediaCard from '@/components/MediaCard';
+import Header from '@/components/Header';
 
 interface SearchResult {
   id: number;
@@ -27,25 +28,34 @@ interface SearchResponse {
 }
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('');
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get('q');
+
+  const [query, setQuery] = useState(urlQuery || '');
   const [results, setResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Auto-search if there's a query in the URL
+  useEffect(() => {
+    if (urlQuery && urlQuery !== query) {
+      setQuery(urlQuery);
+      performSearch(urlQuery);
+    }
+  }, [urlQuery]);
 
-    if (!query.trim()) return;
+  const performSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
 
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       setResults(data);
     } catch (error) {
       console.error('Search error:', error);
       setResults({
-        query,
+        query: searchQuery,
         movies: [],
         series: [],
         from_cache: false,
@@ -57,58 +67,29 @@ export default function SearchPage() {
     }
   };
 
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(query);
+  };
+
   const totalResults = (results?.movies?.length || 0) + (results?.series?.length || 0);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      {/* Header */}
-      <header className="border-b border-gray-700 bg-black/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition">
-              <span className="text-3xl"><¨</span>
-              <h1 className="text-2xl font-bold">OpenMedia</h1>
-            </Link>
-            <nav className="flex gap-6 items-center">
-              <Link href="/movies" className="hover:text-blue-400 transition">
-                Films
-              </Link>
-              <Link href="/series" className="hover:text-blue-400 transition">
-                SÈries
-              </Link>
-              <Link href="/search" className="text-blue-400">
-                Recherche
-              </Link>
-              <div className="flex gap-3 ml-4">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-lg border border-gray-600 hover:border-gray-500 transition"
-                >
-                  Connexion
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition"
-                >
-                  S'inscrire
-                </Link>
-              </div>
-            </nav>
-          </div>
-        </div>
-      </header>
+      {/* Header with Search Bar */}
+      <Header />
 
       {/* Search Section */}
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center">= Recherche Intelligente</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center">üîç Recherche Intelligente</h1>
 
           {/* Info Box */}
           <div className="bg-blue-900/20 border border-blue-600/50 rounded-lg p-4 mb-8">
             <p className="text-blue-200 text-sm">
-              =° <strong>Recherche optimisÈe :</strong> Nous cherchons d'abord dans notre base de donnÈes.
-              Si le film/sÈrie n'est pas trouvÈ, nous le recherchons sur OMDb et l'ajoutons automatiquement
-              ‡ notre collection pour les prochaines recherches.
+              üí° <strong>Recherche optimis√©e :</strong> Nous cherchons d'abord dans notre base de donn√©es.
+              Si le film/s√©rie n'est pas trouv√©, nous le recherchons sur OMDb et l'ajoutons automatiquement
+              √† notre collection pour les prochaines recherches.
             </p>
           </div>
 
@@ -119,7 +100,7 @@ export default function SearchPage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher un film ou une sÈrie..."
+                placeholder="Rechercher un film ou une s√©rie..."
                 className="flex-1 px-6 py-4 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                 autoFocus
               />
@@ -149,9 +130,9 @@ export default function SearchPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold">
                   {totalResults > 0 ? (
-                    `${totalResults} rÈsultat${totalResults > 1 ? 's' : ''} pour "${results.query}"`
+                    `${totalResults} r√©sultat${totalResults > 1 ? 's' : ''} pour "${results.query}"`
                   ) : (
-                    `Aucun rÈsultat pour "${results.query}"`
+                    `Aucun r√©sultat pour "${results.query}"`
                   )}
                 </h2>
 
@@ -160,12 +141,12 @@ export default function SearchPage() {
                   <div className="flex items-center gap-2 text-sm">
                     {results.from_cache && (
                       <span className="px-3 py-1 bg-green-900/50 border border-green-600 rounded-full text-green-300">
-                        ° Depuis le cache
+                        ‚ö° Depuis le cache
                       </span>
                     )}
                     {results.from_omdb && (
                       <span className="px-3 py-1 bg-orange-900/50 border border-orange-600 rounded-full text-orange-300">
-                        < Depuis OMDb (ajoutÈ au cache)
+                        üåê Depuis OMDb (ajout√© au cache)
                       </span>
                     )}
                   </div>
@@ -174,7 +155,7 @@ export default function SearchPage() {
 
               {results.error && (
                 <div className="bg-red-900/20 border border-red-600 rounded-lg p-4 mb-6">
-                  <p className="text-red-300">L {results.error}</p>
+                  <p className="text-red-300">‚ùå {results.error}</p>
                 </div>
               )}
 
@@ -190,7 +171,7 @@ export default function SearchPage() {
           {/* Movies Results */}
           {results && results.movies && results.movies.length > 0 && (
             <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-4"><• Films ({results.movies.length})</h3>
+              <h3 className="text-2xl font-bold mb-4">üé¨ Films ({results.movies.length})</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {results.movies.map((movie) => (
                   <MediaCard
@@ -211,7 +192,7 @@ export default function SearchPage() {
           {/* Series Results */}
           {results && results.series && results.series.length > 0 && (
             <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-4">=˙ SÈries ({results.series.length})</h3>
+              <h3 className="text-2xl font-bold mb-4">üì∫ S√©ries ({results.series.length})</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {results.series.map((series) => (
                   <MediaCard
@@ -233,8 +214,8 @@ export default function SearchPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 text-center text-gray-500 mt-12">
-        <p>OpenMedia v0.1.0 - Plateforme Open Source de Films & SÈries</p>
-        <p className="text-sm mt-2">PropulsÈ par FastAPI, Next.js, PostgreSQL & OMDb</p>
+        <p>OpenMedia v0.1.0 - Plateforme Open Source de Films & S√©ries</p>
+        <p className="text-sm mt-2">Propuls√© par FastAPI, Next.js, PostgreSQL & OMDb</p>
       </footer>
     </main>
   );
