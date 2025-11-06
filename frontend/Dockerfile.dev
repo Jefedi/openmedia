@@ -5,22 +5,23 @@ FROM node:${NODE_VERSION}-alpine
 
 WORKDIR /app
 
-# Installer les dépendances
+# Copier les fichiers de dépendances
 COPY package.json package-lock.json* ./
-RUN npm install
 
-# Copier la configuration
-COPY next.config.js ./
-COPY tailwind.config.js ./
-COPY tsconfig.json ./
-COPY postcss.config.* ./
+# Installer les dépendances
+RUN npm ci
 
-# Le code source sera monté via volume pour hot-reload
+# Copier tout le code source
+COPY . .
+
+# Construire l'application
+RUN npm run build
 
 EXPOSE 3000
 
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV production
 
-# Démarrer en mode développement avec hot-reload
-CMD ["npm", "run", "dev"]
+# Démarrer en mode production (plus stable que dev dans Docker)
+CMD ["npm", "start"]
