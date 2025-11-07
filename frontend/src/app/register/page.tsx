@@ -72,9 +72,11 @@ export default function RegisterPage() {
         // Store tokens
         localStorage.setItem('access_token', loginData.access_token);
         localStorage.setItem('refresh_token', loginData.refresh_token);
+        // Store username from registration form
+        localStorage.setItem('username', formData.username);
 
-        // Redirect to dashboard
-        router.push('/dashboard');
+        // Redirect to home page
+        router.push('/');
       } else {
         // Registration successful but login failed, redirect to login page
         router.push('/login?registered=true');
