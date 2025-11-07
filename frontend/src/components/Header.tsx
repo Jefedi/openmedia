@@ -19,14 +19,34 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [username, setUsername] = useState('');
   const router = useRouter();
   const searchRef = useRef<HTMLFormElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close suggestions when clicking outside
+  // Check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const storedUsername = localStorage.getItem('username');
+
+    if (token) {
+      setIsAuthenticated(true);
+      setUsername(storedUsername || 'Utilisateur');
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  // Close suggestions and user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
       }
     };
 
@@ -79,6 +99,15 @@ export default function Header() {
     setShowSuggestions(false);
     setSearchQuery('');
     router.push(`/${result.type === 'movie' ? 'movies' : 'series'}/${result.id}`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('username');
+    setIsAuthenticated(false);
+    setShowUserMenu(false);
+    router.push('/');
+    window.location.reload(); // Force refresh to update auth state
   };
 
   return (
@@ -194,22 +223,89 @@ export default function Header() {
           <nav className="flex items-center gap-4">
             <Link
               href="/"
-              className="text-gray-300 hover:text-white transition"
+              className="text-gray-300 hover:text-white transition hidden sm:block"
             >
               Accueil
             </Link>
             <Link
               href="/search"
-              className="text-gray-300 hover:text-white transition"
+              className="text-gray-300 hover:text-white transition hidden sm:block"
             >
               Recherche
             </Link>
-            <Link
-              href="/login"
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition font-semibold"
-            >
-              Connexion
-            </Link>
+
+            {isAuthenticated ? (
+              /* User Menu */
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
+                >
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center font-bold">
+                    {username.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden md:inline">{username}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-gray-700">
+                      <p className="text-sm text-gray-400">Connecté en tant que</p>
+                      <p className="font-semibold truncate">{username}</p>
+                    </div>
+
+                    <Link
+                      href="/library"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <span>Ma Bibliothèque</span>
+                    </Link>
+
+                    <Link
+                      href="/profile"
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span>Mon Profil</span>
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-900/20 text-red-400 transition border-t border-gray-700"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span>Déconnexion</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Login Button */
+              <Link
+                href="/login"
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition font-semibold"
+              >
+                Connexion
+              </Link>
+            )}
           </nav>
         </div>
       </div>

@@ -37,8 +37,26 @@ export default function LoginPage() {
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Fetch user info to get username
+      try {
+        const userResponse = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${data.access_token}`,
+          },
+        });
+
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          localStorage.setItem('username', userData.username || userData.email);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+        // Store email as fallback
+        localStorage.setItem('username', formData.email.split('@')[0]);
+      }
+
+      // Redirect to home page
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'An error occurred during login');
     } finally {
