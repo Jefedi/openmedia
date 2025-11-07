@@ -4,7 +4,26 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LibraryActions from '@/components/LibraryActions';
+import GenreList from '@/components/GenreList';
+import CastList from '@/components/CastList';
 
+interface Genre {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Person {
+  id: number;
+  name: string;
+  profile_path?: string;
+}
+
+interface CastMember {
+  character?: string;
+  order: number;
+  person: Person;
+}
 
 interface Movie {
   id: number;
@@ -32,6 +51,8 @@ interface Movie {
   vote_average?: number;
   vote_count?: number;
   created_at?: string;
+  genres?: Genre[];
+  cast?: CastMember[];
 }
 
 export default function MovieDetailPage() {
@@ -181,22 +202,15 @@ export default function MovieDetailPage() {
                 <p className="text-lg text-gray-300 italic mb-4">{movie.tagline}</p>
               )}
 
+              {/* Genres */}
+              {movie.genres && movie.genres.length > 0 && (
+                <GenreList genres={movie.genres} />
+              )}
+
               {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-4 mb-6 text-lg">
                 {movie.released && (
                   <span className="text-gray-300">{new Date(movie.released).toLocaleDateString('fr-FR')}</span>
-                )}
-                {genres.length > 0 && (
-                  <>
-                    <span className="text-gray-500">•</span>
-                    <div className="flex flex-wrap gap-2">
-                      {genres.map((genre, i) => (
-                        <span key={i} className="px-3 py-1 bg-blue-600/30 border border-blue-500/50 rounded-full text-sm">
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                  </>
                 )}
                 {movie.runtime && (
                   <>
@@ -289,13 +303,18 @@ export default function MovieDetailPage() {
                     <p className="font-semibold">{movie.director}</p>
                   </div>
                 )}
-                {movie.actors && (
+                {movie.actors && !movie.cast && (
                   <div className="md:col-span-2">
                     <p className="text-sm text-gray-400 mb-1">Acteurs principaux</p>
                     <p className="font-semibold">{movie.actors.split(',').slice(0, 3).join(', ')}</p>
                   </div>
                 )}
               </div>
+
+              {/* Cast List */}
+              {movie.cast && movie.cast.length > 0 && (
+                <CastList cast={movie.cast} limit={10} />
+              )}
             </div>
           </div>
         </div>

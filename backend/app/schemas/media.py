@@ -30,6 +30,50 @@ class GenreResponse(GenreBase):
 
 
 # ============================================================================
+# PERSON & CAST SCHEMAS
+# ============================================================================
+
+class PersonBase(BaseModel):
+    """Schema de base pour une personne"""
+    name: str
+    profile_path: Optional[str] = None
+
+
+class PersonResponse(PersonBase):
+    """Schema de réponse pour une personne"""
+    id: int
+    slug: str
+    imdb_id: Optional[str] = None
+    tmdb_id: Optional[int] = None
+    biography: Optional[str] = None
+    birthday: Optional[date] = None
+    place_of_birth: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CastResponse(BaseModel):
+    """Schema de réponse pour un membre du cast"""
+    character: Optional[str] = None
+    order: int
+    person: PersonResponse
+
+    class Config:
+        from_attributes = True
+
+
+class CrewResponse(BaseModel):
+    """Schema de réponse pour un membre de l'équipe technique"""
+    job: str
+    department: str
+    person: PersonResponse
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
 # MOVIE SCHEMAS
 # ============================================================================
 
@@ -85,6 +129,8 @@ class MovieResponse(MovieBase):
     vote_count: int
     popularity: Optional[Decimal] = None
     genres: list[GenreResponse] = []
+    cast: list[CastResponse] = []
+    crew: list[CrewResponse] = []
     created_at: datetime
     updated_at: datetime
 

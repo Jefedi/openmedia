@@ -1,7 +1,7 @@
 """Routes API pour les films"""
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from app.db.session import get_db
@@ -90,8 +90,12 @@ async def get_movie(
     movie_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir un film par ID"""
-    movie = db.query(Movie).filter(Movie.id == movie_id).first()
+    """Obtenir un film par ID avec genres, cast et crew"""
+    movie = db.query(Movie).options(
+        joinedload(Movie.genres),
+        joinedload(Movie.cast).joinedload('person'),
+        joinedload(Movie.crew).joinedload('person')
+    ).filter(Movie.id == movie_id).first()
 
     if not movie:
         raise HTTPException(

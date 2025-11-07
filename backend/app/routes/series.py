@@ -1,7 +1,7 @@
 """Routes API pour les s�ries TV"""
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from app.db.session import get_db
@@ -100,8 +100,10 @@ async def get_series(
     series_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir une s�rie par ID"""
-    series = db.query(Series).filter(Series.id == series_id).first()
+    """Obtenir une s�rie par ID avec genres"""
+    series = db.query(Series).options(
+        joinedload(Series.genres)
+    ).filter(Series.id == series_id).first()
 
     if not series:
         raise HTTPException(

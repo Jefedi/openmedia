@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LibraryActions from '@/components/LibraryActions';
+import GenreList from '@/components/GenreList';
 
+interface Genre {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 interface Series {
   id: number;
@@ -30,6 +36,7 @@ interface Series {
   vote_average?: number;
   vote_count?: number;
   created_at?: string;
+  genres?: Genre[];
 }
 
 export default function SeriesDetailPage() {
@@ -179,22 +186,15 @@ export default function SeriesDetailPage() {
                 <p className="text-lg text-gray-300 italic mb-4">{series.tagline}</p>
               )}
 
+              {/* Genres */}
+              {series.genres && series.genres.length > 0 && (
+                <GenreList genres={series.genres} />
+              )}
+
               {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-4 mb-6 text-lg">
                 {series.released && (
                   <span className="text-gray-300">{new Date(series.released).toLocaleDateString('fr-FR')}</span>
-                )}
-                {genres.length > 0 && (
-                  <>
-                    <span className="text-gray-500">•</span>
-                    <div className="flex flex-wrap gap-2">
-                      {genres.map((genre, i) => (
-                        <span key={i} className="px-3 py-1 bg-purple-600/30 border border-purple-500/50 rounded-full text-sm">
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                  </>
                 )}
                 {series.total_seasons && (
                   <>
