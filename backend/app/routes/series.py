@@ -100,9 +100,10 @@ async def get_series(
     series_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir une s�rie par ID avec genres"""
+    """Obtenir une série par ID avec genres et saisons"""
     series = db.query(Series).options(
-        joinedload(Series.genres)
+        joinedload(Series.genres),
+        joinedload(Series.seasons)
     ).filter(Series.id == series_id).first()
 
     if not series:

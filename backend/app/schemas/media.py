@@ -206,6 +206,8 @@ class SeriesResponse(SeriesBase):
     vote_count: int
     popularity: Optional[Decimal] = None
     genres: list[GenreResponse] = []
+    seasons: list["SeasonResponse"] = []
+    cast: list["CastResponse"] = []
     created_at: datetime
     updated_at: datetime
 
