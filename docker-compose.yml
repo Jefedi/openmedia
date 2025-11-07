@@ -122,6 +122,8 @@ services:
 
       # External APIs
       OMDB_API_KEY: ${OMDB_API_KEY}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+      TMDB_API_READ_TOKEN: ${TMDB_API_READ_TOKEN}
 
     volumes:
       - ./backend/app:/app/app:ro
