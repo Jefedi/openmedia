@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import LibraryActions from '@/components/LibraryActions';
 
 
 interface Series {
@@ -260,6 +261,15 @@ export default function SeriesDetailPage() {
                   )}
                 </div>
               )}
+
+              {/* Library Actions */}
+              <div className="mb-6">
+                <LibraryActions
+                  mediaType="series"
+                  mediaId={series.id}
+                  mediaTitle={series.name}
+                />
+              </div>
 
               {/* Overview/Plot */}
               {(series.plot || series.overview) && (

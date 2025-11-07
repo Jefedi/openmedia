@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import LibraryActions from '@/components/LibraryActions';
 
 
 interface Movie {
@@ -260,6 +261,15 @@ export default function MovieDetailPage() {
                   )}
                 </div>
               )}
+
+              {/* Library Actions */}
+              <div className="mb-6">
+                <LibraryActions
+                  mediaType="movie"
+                  mediaId={movie.id}
+                  mediaTitle={movie.title}
+                />
+              </div>
 
               {/* Overview/Plot */}
               {(movie.plot || movie.overview) && (
