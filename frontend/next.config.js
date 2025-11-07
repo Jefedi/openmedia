@@ -24,11 +24,28 @@ const nextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: http:",
+              "font-src 'self' data:",
+              "connect-src 'self' http://localhost:* https://api.themoviedb.org https://image.tmdb.org",
+              "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+              "media-src 'self' https:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'self'",
+            ].join('; '),
           },
         ],
       },
@@ -49,6 +66,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'image.tmdb.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
       },
       {
         protocol: 'https',
