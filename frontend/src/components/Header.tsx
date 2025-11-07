@@ -200,9 +200,15 @@ export default function Header() {
             </Link>
             <Link
               href="/search"
-              className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
+              className="text-gray-300 hover:text-white transition"
             >
-              Recherche avancée
+              Recherche
+            </Link>
+            <Link
+              href="/login"
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition font-semibold"
+            >
+              Connexion
             </Link>
           </nav>
         </div>

@@ -167,12 +167,20 @@ export default function Home() {
           <p className="text-xl mb-8 text-blue-100">
             Créez votre compte et commencez à suivre vos films et séries préférés
           </p>
-          <Link
-            href="/register"
-            className="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-gray-100 transition text-lg"
-          >
-            Créer un compte gratuitement
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/register"
+              className="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-gray-100 transition text-lg"
+            >
+              Créer un compte gratuitement
+            </Link>
+            <Link
+              href="/login"
+              className="inline-block px-8 py-4 bg-blue-800 hover:bg-blue-900 text-white rounded-lg font-bold transition text-lg border-2 border-white/30"
+            >
+              Se connecter
+            </Link>
+          </div>
         </div>
       </section>
 
