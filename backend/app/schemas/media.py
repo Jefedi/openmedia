@@ -74,6 +74,51 @@ class CrewResponse(BaseModel):
 
 
 # ============================================================================
+# VIDEO SCHEMAS
+# ============================================================================
+
+class VideoResponse(BaseModel):
+    """Schema de réponse pour une vidéo (trailer, teaser, etc.)"""
+    id: int
+    key: str  # YouTube video ID
+    name: str
+    site: str  # YouTube, Vimeo, etc.
+    type: str  # Trailer, Teaser, Clip, Behind the Scenes, Featurette
+    size: int  # 360, 480, 720, 1080
+    official: bool
+    published_at: Optional[datetime] = None
+    iso_639_1: Optional[str] = None  # Language code
+    iso_3166_1: Optional[str] = None  # Country code
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
+# SERIES-SPECIFIC CAST & CREW SCHEMAS
+# ============================================================================
+
+class SeriesCastResponse(BaseModel):
+    """Schema de réponse pour un membre du cast d'une série"""
+    character: Optional[str] = None
+    order: int
+    person: PersonResponse
+
+    class Config:
+        from_attributes = True
+
+
+class SeriesCrewResponse(BaseModel):
+    """Schema de réponse pour un membre de l'équipe technique d'une série"""
+    job: str
+    department: str
+    person: PersonResponse
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
 # MOVIE SCHEMAS
 # ============================================================================
 
@@ -131,6 +176,7 @@ class MovieResponse(MovieBase):
     genres: list[GenreResponse] = []
     cast: list[CastResponse] = []
     crew: list[CrewResponse] = []
+    videos: list[VideoResponse] = []
     created_at: datetime
     updated_at: datetime
 
@@ -207,7 +253,9 @@ class SeriesResponse(SeriesBase):
     popularity: Optional[Decimal] = None
     genres: list[GenreResponse] = []
     seasons: list["SeasonResponse"] = []
-    cast: list["CastResponse"] = []
+    cast: list[SeriesCastResponse] = []
+    crew: list[SeriesCrewResponse] = []
+    videos: list[VideoResponse] = []
     created_at: datetime
     updated_at: datetime
 

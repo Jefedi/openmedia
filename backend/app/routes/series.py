@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from app.db.session import get_db
-from app.models.media import Series, Season, Episode, Genre, series_genres
+from app.models.media import Series, Season, Episode, Genre, series_genres, SeriesCast, SeriesCrew, Video
 from app.models.user import User
 from app.schemas.media import (
     SeriesResponse,
@@ -100,10 +100,13 @@ async def get_series(
     series_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir une série par ID avec genres et saisons"""
+    """Obtenir une série par ID avec genres, saisons, cast, crew et videos"""
     series = db.query(Series).options(
         joinedload(Series.genres),
-        joinedload(Series.seasons)
+        joinedload(Series.seasons),
+        joinedload(Series.cast).joinedload(SeriesCast.person),
+        joinedload(Series.crew).joinedload(SeriesCrew.person),
+        joinedload(Series.videos)
     ).filter(Series.id == series_id).first()
 
     if not series:

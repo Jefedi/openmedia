@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from app.db.session import get_db
-from app.models.media import Movie, Genre, movie_genres, Cast, Crew
+from app.models.media import Movie, Genre, movie_genres, Cast, Crew, Video
 from app.models.user import User
 from app.schemas.media import (
     MovieResponse,
@@ -90,11 +90,12 @@ async def get_movie(
     movie_id: int,
     db: Session = Depends(get_db)
 ):
-    """Obtenir un film par ID avec genres, cast et crew"""
+    """Obtenir un film par ID avec genres, cast, crew et videos"""
     movie = db.query(Movie).options(
         joinedload(Movie.genres),
         joinedload(Movie.cast).joinedload(Cast.person),
-        joinedload(Movie.crew).joinedload(Crew.person)
+        joinedload(Movie.crew).joinedload(Crew.person),
+        joinedload(Movie.videos)
     ).filter(Movie.id == movie_id).first()
 
     if not movie:
