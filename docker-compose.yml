@@ -210,6 +210,8 @@ services:
       dockerfile: Dockerfile.dev
       args:
         NODE_VERSION: ${NODE_VERSION:-20}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:18000}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-OpenMedia}
     container_name: openmedia_frontend
     restart: unless-stopped
     environment:
@@ -217,7 +219,7 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:18000}
       # Server-side API URL (internal Docker network)
       API_URL: http://api:8000
-      NEXT_PUBLIC_APP_NAME: OpenMedia
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-OpenMedia}
       NODE_ENV: production
     ports:
       - "${FRONTEND_PORT:-13000}:3000"
