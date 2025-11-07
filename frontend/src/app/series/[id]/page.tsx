@@ -106,9 +106,13 @@ export default function SeriesDetailPage() {
     const fetchSeries = async () => {
       try {
         setLoading(true);
+        console.log('Fetching series with ID:', params.id);
         const response = await fetch(`/api/series/${params.id}`);
+        console.log('Series API response status:', response.status);
 
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Series API error response:', errorText);
           if (response.status === 404) {
             setError('Série non trouvée');
           } else {
@@ -118,9 +122,11 @@ export default function SeriesDetailPage() {
         }
 
         const data = await response.json();
+        console.log('Series data received:', data);
         setSeries(data);
       } catch (err) {
         console.error('Error fetching series:', err);
+        console.error('Error details:', err instanceof Error ? err.message : String(err));
         setError('Erreur lors du chargement de la série');
       } finally {
         setLoading(false);

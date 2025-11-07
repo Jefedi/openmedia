@@ -91,9 +91,13 @@ export default function MovieDetailPage() {
     const fetchMovie = async () => {
       try {
         setLoading(true);
+        console.log('Fetching movie with ID:', params.id);
         const response = await fetch(`/api/movies/${params.id}`);
+        console.log('Movie API response status:', response.status);
 
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Movie API error response:', errorText);
           if (response.status === 404) {
             setError('Film non trouvé');
           } else {
@@ -103,9 +107,11 @@ export default function MovieDetailPage() {
         }
 
         const data = await response.json();
+        console.log('Movie data received:', data);
         setMovie(data);
       } catch (err) {
         console.error('Error fetching movie:', err);
+        console.error('Error details:', err instanceof Error ? err.message : String(err));
         setError('Erreur lors du chargement du film');
       } finally {
         setLoading(false);
