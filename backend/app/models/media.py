@@ -129,6 +129,11 @@ class Movie(Base):
         back_populates="movie",
         cascade="all, delete-orphan"
     )
+    videos: Mapped[list["Video"]] = relationship(
+        "Video",
+        back_populates="movie",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"Movie(id={self.id}, title={self.title}, year={self.year})"
@@ -208,6 +213,21 @@ class Series(Base):
         back_populates="series",
         cascade="all, delete-orphan",
         order_by="Season.season_number"
+    )
+    cast: Mapped[list["SeriesCast"]] = relationship(
+        "SeriesCast",
+        back_populates="series",
+        cascade="all, delete-orphan"
+    )
+    crew: Mapped[list["SeriesCrew"]] = relationship(
+        "SeriesCrew",
+        back_populates="series",
+        cascade="all, delete-orphan"
+    )
+    videos: Mapped[list["Video"]] = relationship(
+        "Video",
+        back_populates="series",
+        cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
@@ -407,3 +427,112 @@ class Crew(Base):
 
     def __repr__(self) -> str:
         return f"Crew(movie_id={self.movie_id}, person_id={self.person_id}, job={self.job})"
+
+
+class SeriesCast(Base):
+    """Distribution (acteurs) d'une série"""
+
+    __tablename__ = "series_cast"
+
+    # Relations
+    series_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("series.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    series: Mapped["Series"] = relationship("Series", back_populates="cast")
+
+    person_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("people.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    person: Mapped["Person"] = relationship("Person")
+
+    # Informations
+    character: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    order: Mapped[int] = mapped_column(Integer, nullable=False)  # Ordre d'apparition
+
+    __table_args__ = (
+        UniqueConstraint("series_id", "person_id", "character", name="uq_series_cast"),
+    )
+
+    def __repr__(self) -> str:
+        return f"SeriesCast(series_id={self.series_id}, person_id={self.person_id}, character={self.character})"
+
+
+class SeriesCrew(Base):
+    """Équipe technique d'une série"""
+
+    __tablename__ = "series_crew"
+
+    # Relations
+    series_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("series.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    series: Mapped["Series"] = relationship("Series", back_populates="crew")
+
+    person_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("people.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    person: Mapped["Person"] = relationship("Person")
+
+    # Informations
+    job: Mapped[str] = mapped_column(String(100), nullable=False)  # Creator, Producer, Writer, etc.
+    department: Mapped[str] = mapped_column(String(100), nullable=False)  # Production, Writing, etc.
+
+    __table_args__ = (
+        UniqueConstraint("series_id", "person_id", "job", name="uq_series_crew"),
+    )
+
+    def __repr__(self) -> str:
+        return f"SeriesCrew(series_id={self.series_id}, person_id={self.person_id}, job={self.job})"
+
+
+class Video(Base):
+    """Vidéos (trailers, teasers, etc.) pour films et séries"""
+
+    __tablename__ = "videos"
+
+    # Relations
+    movie_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("movies.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True
+    )
+    movie: Mapped[Optional["Movie"]] = relationship("Movie", back_populates="videos")
+
+    series_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("series.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True
+    )
+    series: Mapped[Optional["Series"]] = relationship("Series", back_populates="videos")
+
+    # Informations
+    key: Mapped[str] = mapped_column(String(255), nullable=False)  # YouTube video ID
+    name: Mapped[str] = mapped_column(String(500), nullable=False)
+    site: Mapped[str] = mapped_column(String(50), nullable=False, default="YouTube")  # YouTube, Vimeo, etc.
+    type: Mapped[str] = mapped_column(String(50), nullable=False)  # Trailer, Teaser, Clip, Behind the Scenes, Featurette
+    size: Mapped[int] = mapped_column(Integer, nullable=False, default=1080)  # 360, 480, 720, 1080
+    official: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    iso_639_1: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # Language code
+    iso_3166_1: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # Country code
+
+    __table_args__ = (
+        UniqueConstraint("movie_id", "series_id", "key", name="uq_video_media_key"),
+    )
+
+    def __repr__(self) -> str:
+        return f"Video(key={self.key}, name={self.name}, type={self.type})"
