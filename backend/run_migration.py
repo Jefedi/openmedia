@@ -20,17 +20,31 @@ def run_migration(sql_file: str):
     print(f"📄 Lecture du fichier de migration: {sql_file}")
     sql_content = sql_path.read_text()
 
-    # Split by statements (basic approach)
-    statements = [s.strip() for s in sql_content.split(';') if s.strip() and not s.strip().startswith('--')]
+    # Remove comments and clean up SQL
+    lines = []
+    for line in sql_content.split('\n'):
+        # Skip comment lines
+        stripped = line.strip()
+        if stripped.startswith('--'):
+            continue
+        # Remove inline comments
+        if '--' in line:
+            line = line.split('--')[0]
+        lines.append(line)
+
+    cleaned_sql = '\n'.join(lines)
+
+    # Split by statements
+    statements = []
+    for s in cleaned_sql.split(';'):
+        s = s.strip()
+        if s:  # Only add non-empty statements
+            statements.append(s)
 
     print(f"🔄 Exécution de {len(statements)} statements SQL...")
 
     with engine.begin() as conn:
         for i, statement in enumerate(statements, 1):
-            # Skip comments
-            if statement.startswith('--') or not statement:
-                continue
-
             try:
                 print(f"   [{i}/{len(statements)}] Exécution...")
                 conn.execute(text(statement))
