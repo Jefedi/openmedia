@@ -5,11 +5,53 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LibraryActions from '@/components/LibraryActions';
 import GenreList from '@/components/GenreList';
+import CastList from '@/components/CastList';
+import RatingSection from '@/components/RatingSection';
+import DetailSection from '@/components/DetailSection';
+import StreamingPlatforms from '@/components/StreamingPlatforms';
+import SupplementsSection from '@/components/SupplementsSection';
+import SeasonsSection from '@/components/SeasonsSection';
 
 interface Genre {
   id: number;
   name: string;
   slug: string;
+}
+
+interface Person {
+  id: number;
+  name: string;
+  profile_path?: string;
+}
+
+interface CastMember {
+  character?: string;
+  order: number;
+  person: Person;
+}
+
+interface Platform {
+  name: string;
+  logo?: string;
+  type: 'streaming' | 'rent' | 'buy';
+  url?: string;
+}
+
+interface Video {
+  key: string;
+  name: string;
+  type: 'Trailer' | 'Teaser' | 'Clip' | 'Behind the Scenes' | 'Featurette';
+  site: 'YouTube' | 'Vimeo';
+}
+
+interface Season {
+  id: number;
+  name: string;
+  season_number: number;
+  episode_count: number;
+  overview?: string;
+  air_date?: string;
+  poster_path?: string;
 }
 
 interface Series {
@@ -37,6 +79,21 @@ interface Series {
   vote_count?: number;
   created_at?: string;
   genres?: Genre[];
+  // New fields for components
+  status?: string;
+  original_language?: string;
+  production_companies?: string[];
+  platforms?: Platform[];
+  videos?: Video[];
+  creators?: string[];
+  writers?: string[];
+  cast?: CastMember[];
+  seasons?: Season[];
+  first_air_date?: string;
+  last_air_date?: string;
+  episode_runtime?: number[];
+  number_of_seasons?: number;
+  number_of_episodes?: number;
 }
 
 export default function SeriesDetailPage() {
@@ -191,76 +248,6 @@ export default function SeriesDetailPage() {
                 <GenreList genres={series.genres} />
               )}
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-4 mb-6 text-lg">
-                {series.released && (
-                  <span className="text-gray-300">{new Date(series.released).toLocaleDateString('fr-FR')}</span>
-                )}
-                {series.total_seasons && (
-                  <>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-gray-300">
-                      {series.total_seasons} saison{series.total_seasons > 1 ? 's' : ''}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Rating */}
-              {rating && (
-                <div className="flex items-center gap-6 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-16 h-16">
-                      <svg className="w-16 h-16 transform -rotate-90">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                          className="text-gray-700"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * 28}`}
-                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - ratingPercent / 100)}`}
-                          className={
-                            ratingPercent >= 70
-                              ? 'text-green-500'
-                              : ratingPercent >= 50
-                              ? 'text-yellow-500'
-                              : 'text-red-500'
-                          }
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xl font-bold">{ratingPercent}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Note</p>
-                      <p className="text-sm text-gray-400">utilisateurs</p>
-                    </div>
-                  </div>
-
-                  {series.imdb_rating && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-yellow-400 text-2xl">⭐</span>
-                      <div>
-                        <p className="font-semibold">{Number(series.imdb_rating).toFixed(1)}/10</p>
-                        <p className="text-sm text-gray-400">IMDb</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Library Actions */}
               <div className="mb-6">
@@ -282,20 +269,12 @@ export default function SeriesDetailPage() {
               )}
 
               {/* Crew Info */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {series.director && (
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">Créateur</p>
-                    <p className="font-semibold">{series.director}</p>
-                  </div>
-                )}
-                {series.actors && (
-                  <div className="md:col-span-2">
-                    <p className="text-sm text-gray-400 mb-1">Acteurs principaux</p>
-                    <p className="font-semibold">{series.actors.split(',').slice(0, 3).join(', ')}</p>
-                  </div>
-                )}
-              </div>
+              {series.director && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-400 mb-1">Créateur</p>
+                  <p className="font-semibold text-lg">{series.director}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -304,71 +283,52 @@ export default function SeriesDetailPage() {
       {/* Additional Information */}
       <div className="bg-gray-800/50 border-t border-gray-700">
         <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Cast */}
-            {series.actors && (
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>🎭</span> Distribution
-                </h3>
-                <div className="space-y-2">
-                  {series.actors.split(',').slice(0, 5).map((actor, i) => (
-                    <p key={i} className="text-gray-300">{actor.trim()}</p>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Ratings Section */}
+          <RatingSection
+            tmdbRating={series.vote_average}
+            tmdbVotes={series.vote_count}
+            imdbRating={series.imdb_rating?.toString()}
+            imdbId={series.imdb_id}
+          />
 
-            {/* Details */}
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <span>ℹ️</span> Informations
+          {/* Detail Section */}
+          <DetailSection
+            firstAirDate={series.first_air_date || series.released}
+            lastAirDate={series.last_air_date}
+            episodeRuntime={series.episode_runtime}
+            status={series.status}
+            creators={series.creators}
+            writers={series.writers}
+            originalLanguage={series.original_language}
+            productionCompanies={series.production_companies}
+            genres={series.genres}
+            numberOfSeasons={series.number_of_seasons || series.total_seasons}
+            numberOfEpisodes={series.number_of_episodes}
+          />
+
+          {/* Streaming Platforms */}
+          <StreamingPlatforms platforms={series.platforms} />
+
+          {/* Seasons Section */}
+          {series.seasons && series.seasons.length > 0 && (
+            <SeasonsSection seasons={series.seasons} seriesId={series.id} />
+          )}
+
+          {/* Cast List */}
+          {series.cast && series.cast.length > 0 && (
+            <CastList cast={series.cast} limit={10} />
+          )}
+
+          {/* Supplemental Videos */}
+          <SupplementsSection videos={series.videos} />
+
+          {/* Legacy Awards Section */}
+          {series.awards && (
+            <div className="bg-gray-800/50 rounded-lg p-6 mb-6">
+              <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <span>🏆</span> Récompenses
               </h3>
-              <dl className="space-y-3">
-                {series.country && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Pays</dt>
-                    <dd className="text-gray-200">{series.country}</dd>
-                  </div>
-                )}
-                {series.language && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Langue</dt>
-                    <dd className="text-gray-200">{series.language}</dd>
-                  </div>
-                )}
-                {series.total_seasons && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Nombre de saisons</dt>
-                    <dd className="text-gray-200">{series.total_seasons}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-
-            {/* Awards */}
-            {series.awards && (
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>🏆</span> Récompenses
-                </h3>
-                <p className="text-gray-300">{series.awards}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Seasons - Placeholder for future implementation */}
-          {series.total_seasons && series.total_seasons > 0 && (
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold mb-4">Saisons</h3>
-              <div className="bg-gray-800 rounded-lg p-6">
-                <p className="text-gray-400">
-                  Cette série comporte {series.total_seasons} saison{series.total_seasons > 1 ? 's' : ''}.
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Les détails des saisons et épisodes seront bientôt disponibles.
-                </p>
-              </div>
+              <p className="text-gray-300">{series.awards}</p>
             </div>
           )}
         </div>

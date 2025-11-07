@@ -6,6 +6,10 @@ import Link from 'next/link';
 import LibraryActions from '@/components/LibraryActions';
 import GenreList from '@/components/GenreList';
 import CastList from '@/components/CastList';
+import RatingSection from '@/components/RatingSection';
+import DetailSection from '@/components/DetailSection';
+import StreamingPlatforms from '@/components/StreamingPlatforms';
+import SupplementsSection from '@/components/SupplementsSection';
 
 interface Genre {
   id: number;
@@ -23,6 +27,20 @@ interface CastMember {
   character?: string;
   order: number;
   person: Person;
+}
+
+interface Platform {
+  name: string;
+  logo?: string;
+  type: 'streaming' | 'rent' | 'buy';
+  url?: string;
+}
+
+interface Video {
+  key: string;
+  name: string;
+  type: 'Trailer' | 'Teaser' | 'Clip' | 'Behind the Scenes' | 'Featurette';
+  site: 'YouTube' | 'Vimeo';
 }
 
 interface Movie {
@@ -53,6 +71,14 @@ interface Movie {
   created_at?: string;
   genres?: Genre[];
   cast?: CastMember[];
+  // New fields for components
+  status?: string;
+  original_language?: string;
+  production_companies?: string[];
+  platforms?: Platform[];
+  videos?: Video[];
+  creators?: string[];
+  writers?: string[];
 }
 
 export default function MovieDetailPage() {
@@ -207,74 +233,6 @@ export default function MovieDetailPage() {
                 <GenreList genres={movie.genres} />
               )}
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-4 mb-6 text-lg">
-                {movie.released && (
-                  <span className="text-gray-300">{new Date(movie.released).toLocaleDateString('fr-FR')}</span>
-                )}
-                {movie.runtime && (
-                  <>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-gray-300">{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}min</span>
-                  </>
-                )}
-              </div>
-
-              {/* Rating */}
-              {rating && (
-                <div className="flex items-center gap-6 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-16 h-16">
-                      <svg className="w-16 h-16 transform -rotate-90">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                          className="text-gray-700"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * 28}`}
-                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - ratingPercent / 100)}`}
-                          className={
-                            ratingPercent >= 70
-                              ? 'text-green-500'
-                              : ratingPercent >= 50
-                              ? 'text-yellow-500'
-                              : 'text-red-500'
-                          }
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xl font-bold">{ratingPercent}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold">Note</p>
-                      <p className="text-sm text-gray-400">utilisateurs</p>
-                    </div>
-                  </div>
-
-                  {movie.imdb_rating && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-yellow-400 text-2xl">⭐</span>
-                      <div>
-                        <p className="font-semibold">{Number(movie.imdb_rating).toFixed(1)}/10</p>
-                        <p className="text-sm text-gray-400">IMDb</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Library Actions */}
               <div className="mb-6">
@@ -296,24 +254,11 @@ export default function MovieDetailPage() {
               )}
 
               {/* Crew Info */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {movie.director && (
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">Réalisateur</p>
-                    <p className="font-semibold">{movie.director}</p>
-                  </div>
-                )}
-                {movie.actors && !movie.cast && (
-                  <div className="md:col-span-2">
-                    <p className="text-sm text-gray-400 mb-1">Acteurs principaux</p>
-                    <p className="font-semibold">{movie.actors.split(',').slice(0, 3).join(', ')}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Cast List */}
-              {movie.cast && movie.cast.length > 0 && (
-                <CastList cast={movie.cast} limit={10} />
+              {movie.director && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-400 mb-1">Réalisateur</p>
+                  <p className="font-semibold text-lg">{movie.director}</p>
+                </div>
               )}
             </div>
           </div>
@@ -323,64 +268,46 @@ export default function MovieDetailPage() {
       {/* Additional Information */}
       <div className="bg-gray-800/50 border-t border-gray-700">
         <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Cast */}
-            {movie.actors && (
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>🎭</span> Distribution
-                </h3>
-                <div className="space-y-2">
-                  {movie.actors.split(',').slice(0, 5).map((actor, i) => (
-                    <p key={i} className="text-gray-300">{actor.trim()}</p>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* Ratings Section */}
+          <RatingSection
+            tmdbRating={movie.vote_average}
+            tmdbVotes={movie.vote_count}
+            imdbRating={movie.imdb_rating?.toString()}
+            imdbId={movie.imdb_id}
+          />
 
-            {/* Details */}
-            <div className="bg-gray-800 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <span>ℹ️</span> Informations
+          {/* Detail Section */}
+          <DetailSection
+            releaseDate={movie.released}
+            runtime={movie.runtime}
+            status={movie.status}
+            creators={movie.creators}
+            writers={movie.writers}
+            originalLanguage={movie.original_language}
+            productionCompanies={movie.production_companies}
+            genres={movie.genres}
+          />
+
+          {/* Streaming Platforms */}
+          <StreamingPlatforms platforms={movie.platforms} />
+
+          {/* Cast List */}
+          {movie.cast && movie.cast.length > 0 && (
+            <CastList cast={movie.cast} limit={10} />
+          )}
+
+          {/* Supplemental Videos */}
+          <SupplementsSection videos={movie.videos} />
+
+          {/* Legacy Awards Section */}
+          {movie.awards && (
+            <div className="bg-gray-800/50 rounded-lg p-6 mb-6">
+              <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <span>🏆</span> Récompenses
               </h3>
-              <dl className="space-y-3">
-                {movie.country && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Pays</dt>
-                    <dd className="text-gray-200">{movie.country}</dd>
-                  </div>
-                )}
-                {movie.language && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Langue</dt>
-                    <dd className="text-gray-200">{movie.language}</dd>
-                  </div>
-                )}
-                {movie.box_office && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Box Office</dt>
-                    <dd className="text-gray-200">{movie.box_office}</dd>
-                  </div>
-                )}
-                {movie.production && (
-                  <div>
-                    <dt className="text-sm text-gray-400">Production</dt>
-                    <dd className="text-gray-200">{movie.production}</dd>
-                  </div>
-                )}
-              </dl>
+              <p className="text-gray-300">{movie.awards}</p>
             </div>
-
-            {/* Awards */}
-            {movie.awards && (
-              <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>🏆</span> Récompenses
-                </h3>
-                <p className="text-gray-300">{movie.awards}</p>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
