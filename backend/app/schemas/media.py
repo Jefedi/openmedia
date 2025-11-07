@@ -195,6 +195,47 @@ class MovieListResponse(BaseModel):
 
 
 # ============================================================================
+# SEASON SCHEMAS
+# ============================================================================
+
+class SeasonBase(BaseModel):
+    """Schema de base pour une saison"""
+    name: str
+    season_number: int
+    overview: Optional[str] = None
+    air_date: Optional[date] = None
+    episode_count: int = 0
+    poster_path: Optional[str] = None
+
+
+class SeasonCreate(SeasonBase):
+    """Schema pour créer une saison"""
+    series_id: int
+    tmdb_id: Optional[int] = None
+
+
+class SeasonUpdate(BaseModel):
+    """Schema pour mettre à jour une saison"""
+    name: Optional[str] = None
+    overview: Optional[str] = None
+    air_date: Optional[date] = None
+    episode_count: Optional[int] = None
+    poster_path: Optional[str] = None
+
+
+class SeasonResponse(SeasonBase):
+    """Schema de réponse pour une saison"""
+    id: int
+    series_id: int
+    tmdb_id: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
 # TV SHOW (SERIES) SCHEMAS
 # ============================================================================
 
@@ -271,47 +312,6 @@ class SeriesListResponse(BaseModel):
     total: int
     page: int
     page_size: int
-
-
-# ============================================================================
-# SEASON SCHEMAS
-# ============================================================================
-
-class SeasonBase(BaseModel):
-    """Schema de base pour une saison"""
-    name: str
-    season_number: int
-    overview: Optional[str] = None
-    air_date: Optional[date] = None
-    episode_count: int = 0
-    poster_path: Optional[str] = None
-
-
-class SeasonCreate(SeasonBase):
-    """Schema pour créer une saison"""
-    series_id: int
-    tmdb_id: Optional[int] = None
-
-
-class SeasonUpdate(BaseModel):
-    """Schema pour mettre à jour une saison"""
-    name: Optional[str] = None
-    overview: Optional[str] = None
-    air_date: Optional[date] = None
-    episode_count: Optional[int] = None
-    poster_path: Optional[str] = None
-
-
-class SeasonResponse(SeasonBase):
-    """Schema de réponse pour une saison"""
-    id: int
-    series_id: int
-    tmdb_id: Optional[int] = None
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================
