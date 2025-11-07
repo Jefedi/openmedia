@@ -395,7 +395,9 @@ async def import_series_from_omdb(
         except:
             pass
 
-    # Créer la série
+    # Créer la série avec poster haute qualité
+    poster_url = omdb_service.get_poster_url(omdb_data.get("Poster"), high_quality=True)
+
     series = Series(
         imdb_id=imdb_id,
         name=name,
@@ -405,7 +407,7 @@ async def import_series_from_omdb(
         year=year,
         number_of_seasons=total_seasons,
         original_language=omdb_data.get("Language", "").split(",")[0].strip() if omdb_data.get("Language") != "N/A" else None,
-        poster_path=omdb_data.get("Poster") if omdb_data.get("Poster") != "N/A" else None,
+        poster_path=poster_url,
         vote_average=rating,
         adult=omdb_data.get("Rated") == "R" or omdb_data.get("Rated") == "NC-17"
     )

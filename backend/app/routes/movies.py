@@ -320,7 +320,9 @@ async def import_movie_from_omdb(
         except:
             pass
 
-    # Créer le film
+    # Créer le film avec poster haute qualité
+    poster_url = omdb_service.get_poster_url(omdb_data.get("Poster"), high_quality=True)
+
     movie = Movie(
         imdb_id=imdb_id,
         title=title,
@@ -330,7 +332,7 @@ async def import_movie_from_omdb(
         year=year,
         runtime=runtime,
         original_language=omdb_data.get("Language", "").split(",")[0].strip() if omdb_data.get("Language") != "N/A" else None,
-        poster_path=omdb_data.get("Poster") if omdb_data.get("Poster") != "N/A" else None,
+        poster_path=poster_url,
         vote_average=rating,
         adult=omdb_data.get("Rated") == "R" or omdb_data.get("Rated") == "NC-17"
     )

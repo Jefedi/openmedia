@@ -14,23 +14,23 @@ router = APIRouter(prefix="/search", tags=["Search"])
 
 
 def search_local_movies(db: Session, query: str, limit: int = 10) -> List[Movie]:
-    """Rechercher des films dans la BDD locale"""
+    """Rechercher des films dans la BDD locale, triés par note décroissante"""
     return db.query(Movie).filter(
         or_(
             func.lower(Movie.title).contains(query.lower()),
             func.lower(Movie.original_title).contains(query.lower())
         )
-    ).limit(limit).all()
+    ).order_by(Movie.vote_average.desc().nullslast()).limit(limit).all()
 
 
 def search_local_series(db: Session, query: str, limit: int = 10) -> List[Series]:
-    """Rechercher des séries dans la BDD locale"""
+    """Rechercher des séries dans la BDD locale, triées par note décroissante"""
     return db.query(Series).filter(
         or_(
             func.lower(Series.name).contains(query.lower()),
             func.lower(Series.original_name).contains(query.lower())
         )
-    ).limit(limit).all()
+    ).order_by(Series.vote_average.desc().nullslast()).limit(limit).all()
 
 
 async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Movie]:
@@ -70,7 +70,9 @@ async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Mov
         except:
             pass
 
-    # Créer le film
+    # Créer le film avec poster haute qualité
+    poster_url = omdb_service.get_poster_url(omdb_data.get("Poster"), high_quality=True)
+
     movie = Movie(
         imdb_id=imdb_id,
         title=title,
@@ -80,7 +82,7 @@ async def import_movie_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Mov
         year=year,
         runtime=runtime,
         original_language=omdb_data.get("Language", "").split(",")[0].strip() if omdb_data.get("Language") != "N/A" else None,
-        poster_path=omdb_data.get("Poster") if omdb_data.get("Poster") != "N/A" else None,
+        poster_path=poster_url,
         vote_average=rating,
         adult=omdb_data.get("Rated") == "R" or omdb_data.get("Rated") == "NC-17"
     )
@@ -141,7 +143,9 @@ async def import_series_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Se
         except:
             pass
 
-    # Créer la série
+    # Créer la série avec poster haute qualité
+    poster_url = omdb_service.get_poster_url(omdb_data.get("Poster"), high_quality=True)
+
     series = Series(
         imdb_id=imdb_id,
         name=name,
@@ -151,7 +155,7 @@ async def import_series_from_omdb_auto(db: Session, imdb_id: str) -> Optional[Se
         year=year,
         number_of_seasons=total_seasons,
         original_language=omdb_data.get("Language", "").split(",")[0].strip() if omdb_data.get("Language") != "N/A" else None,
-        poster_path=omdb_data.get("Poster") if omdb_data.get("Poster") != "N/A" else None,
+        poster_path=poster_url,
         vote_average=rating,
         adult=omdb_data.get("Rated") == "R" or omdb_data.get("Rated") == "NC-17"
     )
@@ -210,7 +214,7 @@ async def smart_search(
                 "id": m.id,
                 "title": m.title,
                 "year": m.year,
-                "poster_path": m.poster_path,
+                "poster_path": omdb_service.get_poster_url(m.poster_path, high_quality=True) if omdb_service and m.poster_path else m.poster_path,
                 "vote_average": float(m.vote_average) if m.vote_average else None,
                 "overview": m.overview,
                 "imdb_id": m.imdb_id,
@@ -223,7 +227,7 @@ async def smart_search(
                 "id": s.id,
                 "name": s.name,
                 "year": s.year,
-                "poster_path": s.poster_path,
+                "poster_path": omdb_service.get_poster_url(s.poster_path, high_quality=True) if omdb_service and s.poster_path else s.poster_path,
                 "vote_average": float(s.vote_average) if s.vote_average else None,
                 "overview": s.overview,
                 "imdb_id": s.imdb_id,

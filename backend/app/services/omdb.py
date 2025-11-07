@@ -269,18 +269,32 @@ class OMDbService:
 
         return result
 
-    def get_poster_url(self, poster_path: Optional[str]) -> Optional[str]:
+    def get_poster_url(self, poster_path: Optional[str], high_quality: bool = True) -> Optional[str]:
         """
-        Obtenir l'URL du poster (OMDb retourne déjà l'URL complète)
+        Obtenir l'URL du poster avec option haute qualité
 
         Args:
             poster_path: URL du poster depuis OMDb
+            high_quality: Si True, remplace les paramètres de taille pour avoir une meilleure qualité
 
         Returns:
             URL du poster ou None
         """
         if not poster_path or poster_path == "N/A":
             return None
+
+        # Améliorer la qualité des images IMDb/Amazon
+        # Les URLs OMDb sont souvent au format: https://m.media-amazon.com/images/M/[ID]._V1_SX300.jpg
+        # On peut remplacer SX300 par SX1000 ou UX pour une meilleure qualité
+        if high_quality and ("media-amazon.com" in poster_path or "imdb.com" in poster_path):
+            # Remplacer les paramètres de taille basse résolution par haute résolution
+            import re
+            # Remplacer SX300, SY300, etc. par SX1000 pour une meilleure qualité
+            poster_path = re.sub(r'_V1_SX\d+', '_V1_SX1000', poster_path)
+            poster_path = re.sub(r'_V1_SY\d+', '_V1_SY1000', poster_path)
+            # Ou simplement utiliser UX pour la taille originale
+            poster_path = re.sub(r'_V1_[^.]+\.', '_V1_UX1000.', poster_path)
+
         return poster_path
 
 
