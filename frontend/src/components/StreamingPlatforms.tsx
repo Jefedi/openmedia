@@ -1,3 +1,5 @@
+'use client';
+
 interface Platform {
   name: string;
   logo?: string;

@@ -1,3 +1,5 @@
+'use client';
+
 interface Video {
   key: string; // YouTube video ID
   name: string;

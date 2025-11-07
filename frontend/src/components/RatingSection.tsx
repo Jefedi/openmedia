@@ -1,3 +1,5 @@
+'use client';
+
 interface RatingSectionProps {
   tmdbRating?: number;
   tmdbVotes?: number;

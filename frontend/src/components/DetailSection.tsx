@@ -1,3 +1,5 @@
+'use client';
+
 interface DetailSectionProps {
   releaseDate?: string;
   firstAirDate?: string;
