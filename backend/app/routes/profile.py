@@ -228,9 +228,8 @@ async def upload_avatar(
             detail="File too large. Maximum size is 5MB"
         )
 
-    # Create uploads directory if it doesn't exist
+    # Upload directory (created at startup)
     upload_dir = Path("/app/uploads/avatars")
-    upload_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate unique filename
     file_extension = file.filename.split(".")[-1]

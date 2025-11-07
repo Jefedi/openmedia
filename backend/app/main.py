@@ -27,6 +27,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
 
+    # Create uploads directories
+    uploads_dir = Path("/app/uploads")
+    avatars_dir = uploads_dir / "avatars"
+    try:
+        avatars_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Uploads directory ready: {uploads_dir}")
+    except Exception as e:
+        logger.error(f"Failed to create uploads directory: {e}")
+
     # TODO: Initialiser les connexions DB, Redis, Meilisearch
     # await init_db()
     # await init_redis()
@@ -243,9 +252,7 @@ async def root():
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 # Mount static files for uploads
-uploads_dir = Path("/app/uploads")
-uploads_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+app.mount("/uploads", StaticFiles(directory="/app/uploads"), name="uploads")
 
 
 if __name__ == "__main__":
