@@ -4,7 +4,7 @@ from typing import Optional
 from decimal import Decimal
 
 from sqlalchemy import (
-    String, Text, Integer, Date, Numeric, JSON, Boolean,
+    String, Text, Integer, Date, DateTime, Numeric, JSON, Boolean,
     ForeignKey, Table, Column, UniqueConstraint
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
