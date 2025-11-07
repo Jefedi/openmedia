@@ -1,4 +1,6 @@
 """Schemas pour les films, séries et épisodes"""
+from __future__ import annotations
+
 from datetime import date, datetime
 from typing import Optional
 from decimal import Decimal
@@ -252,7 +254,7 @@ class SeriesResponse(SeriesBase):
     vote_count: int
     popularity: Optional[Decimal] = None
     genres: list[GenreResponse] = []
-    seasons: list["SeasonResponse"] = []
+    seasons: list[SeasonResponse] = []
     cast: list[SeriesCastResponse] = []
     crew: list[SeriesCrewResponse] = []
     videos: list[VideoResponse] = []
