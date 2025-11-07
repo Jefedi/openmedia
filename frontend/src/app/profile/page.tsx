@@ -26,7 +26,9 @@ export default function ProfilePage() {
   const getAvatarUrl = (avatarPath?: string) => {
     if (!avatarPath) return undefined;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:18000';
-    return `${apiUrl}${avatarPath}`;
+    const fullUrl = `${apiUrl}${avatarPath}`;
+    console.log('Avatar URL constructed:', { avatarPath, apiUrl, fullUrl });
+    return fullUrl;
   };
 
   // Form states
@@ -92,6 +94,8 @@ export default function ProfilePage() {
       }
 
       const data = await response.json();
+      console.log('Profile data received:', data);
+      console.log('Avatar URL from backend:', data.avatar_url);
       setProfile(data);
       setUsername(data.username || '');
       setFullName(data.full_name || '');
