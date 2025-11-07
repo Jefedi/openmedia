@@ -20,7 +20,7 @@ export default function Header() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLFormElement>(null);
 
   // Close suggestions when clicking outside
   useEffect(() => {
