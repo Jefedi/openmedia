@@ -22,11 +22,12 @@ export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const router = useRouter();
   const searchRef = useRef<HTMLFormElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Check authentication status
+  // Check authentication status and load profile
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     const storedUsername = localStorage.getItem('username');
@@ -34,6 +35,22 @@ export default function Header() {
     if (token) {
       setIsAuthenticated(true);
       setUsername(storedUsername || 'Utilisateur');
+
+      // Fetch user profile to get avatar
+      fetch('/api/profile/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.avatar_url) {
+            // Convert relative URL to full backend URL
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:18000';
+            setAvatarUrl(`${apiUrl}${data.avatar_url}`);
+          }
+        })
+        .catch(err => console.error('Error fetching profile:', err));
     } else {
       setIsAuthenticated(false);
     }
@@ -241,9 +258,17 @@ export default function Header() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
                 >
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center font-bold">
-                    {username.charAt(0).toUpperCase()}
-                  </div>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={username}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center font-bold">
+                      {username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="hidden md:inline">{username}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}

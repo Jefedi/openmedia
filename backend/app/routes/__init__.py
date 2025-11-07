@@ -1,7 +1,7 @@
 """Routes de l'API"""
 from fastapi import APIRouter
 
-from app.routes import auth, movies, series, search, library
+from app.routes import auth, movies, series, search, library, profile
 
 # Créer le router principal
 api_router = APIRouter()
@@ -18,6 +18,9 @@ api_router.include_router(search.router)
 
 # Enregistrer les routes de bibliothèque personnelle
 api_router.include_router(library.router)
+
+# Enregistrer les routes de profil utilisateur
+api_router.include_router(profile.router)
 
 # TODO: Ajouter d'autres routes
 # from app.routes import users

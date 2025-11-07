@@ -7,7 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from pathlib import Path
 
 from app.config import settings
 from app.utils.logger import logger
@@ -239,6 +241,11 @@ async def root():
 
 # Enregistrer les routes API
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+# Mount static files for uploads
+uploads_dir = Path("/app/uploads")
+uploads_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 
 
 if __name__ == "__main__":

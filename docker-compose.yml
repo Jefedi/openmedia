@@ -127,6 +127,7 @@ services:
       - ./backend/app:/app/app:ro
       - ./backend/alembic:/app/alembic:ro
       - api_logs:/app/logs
+      - uploads:/app/uploads
     ports:
       - "${API_PORT:-18000}:8000"
     depends_on:
@@ -235,6 +236,8 @@ volumes:
   api_logs:
     driver: local
   worker_logs:
+    driver: local
+  uploads:
     driver: local
 
 networks:
