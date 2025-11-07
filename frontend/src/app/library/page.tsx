@@ -42,26 +42,35 @@ export default function LibraryPage() {
           ? '/api/library/watchlist'
           : `/api/library/watchlist?media_type=${filter}`;
 
+        console.log('Fetching watchlist from:', url);
+        console.log('Token present:', !!token);
+
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
 
+        console.log('Response status:', response.status);
+
         if (response.status === 401) {
+          console.error('Unauthorized - redirecting to login');
           router.push('/login');
           return;
         }
 
         if (!response.ok) {
-          throw new Error('Failed to fetch watchlist');
+          const errorData = await response.json().catch(() => ({}));
+          console.error('API error:', response.status, errorData);
+          throw new Error(errorData.error?.message || errorData.detail || 'Failed to fetch watchlist');
         }
 
         const data = await response.json();
+        console.log('Watchlist data received:', data);
         setWatchlist(data.watchlist || []);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching watchlist:', err);
-        setError('Impossible de charger votre bibliothèque');
+        setError(`Impossible de charger votre bibliothèque: ${err.message || 'Erreur inconnue'}`);
       } finally {
         setLoading(false);
       }
